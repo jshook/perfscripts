@@ -1,0 +1,4 @@
+[seqwrite]
+rw=write
+bs=1m
+

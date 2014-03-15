@@ -1,0 +1,4 @@
+[seqread]
+rw=read
+bs=1m
+

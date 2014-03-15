@@ -1,0 +1,10 @@
+[global]
+ioengine=libaio
+size=5G
+filename=seqwrite-raw-data-5G
+filesize=5G
+iodepth=10
+exitall
+time_based
+runtime=1m
+

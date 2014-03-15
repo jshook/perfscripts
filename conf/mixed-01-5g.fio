@@ -1,0 +1,12 @@
+[randread-1k]
+rw=randread
+bs=1k
+
+[seqread]
+rw=read
+bs=1m
+
+[seqwrite]
+rw=write
+bs=1m
+
