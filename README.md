@@ -4,7 +4,7 @@ perfscripts
 scripts to quickly measure system baseline performance
 
 overview
-========
+--------
 
 This is mean to be a quick way to get some comparable performance numbers
 from a system. The goal is to be able to clone the repo and do minimal
@@ -14,12 +14,12 @@ enough to allow for side-by-side comparison with results from different
 systems.
 
 dependencies
-============
+------------
 
 * fio
 
 usage
-=====
+----
 
-# Modify env.sh to fit your system paths, and source it into your shell.
-# bin/run-fio-tests
+#Modify env.sh to fit your system paths, and source it into your shell.
+#bin/run-fio-tests
