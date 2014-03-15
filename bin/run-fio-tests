@@ -11,4 +11,6 @@ do
 
   (cd ${FIO_CONFDIR} ; cat $fiofiles) | \
   (cd ${FIO_DATADIR} ; fio - --eta=always --output ${FIO_RESULTS}/$fioconf.out )
+  echo
+
 done
