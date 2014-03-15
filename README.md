@@ -21,5 +21,4 @@ dependencies
 usage
 ----
 
-#Modify env.sh to fit your system paths, and source it into your shell.
-#bin/run-fio-tests
+Modify env.sh to fit your system paths, and source it into your shell, then bin/run-fio-tests
