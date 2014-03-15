@@ -1,0 +1,4 @@
+[randread-16k]
+rw=randread
+bs=16k
+

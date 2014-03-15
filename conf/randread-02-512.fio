@@ -1,0 +1,4 @@
+[randread-512]
+rw=randread
+bs=512
+

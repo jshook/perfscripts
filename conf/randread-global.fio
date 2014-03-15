@@ -1,0 +1,10 @@
+[global]
+ioengine=libaio
+size=5G
+filename=randread-raw-data-1G
+filesize=1G
+iodepth=10
+exitall
+time_based
+runtime=1m
+

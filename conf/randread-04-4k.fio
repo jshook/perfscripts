@@ -1,0 +1,4 @@
+[randread-4k]
+rw=randread
+bs=4k
+

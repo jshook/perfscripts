@@ -1,0 +1,14 @@
+#!/bin/bash
+FIO_TESTDIR=${FIO_TESTDIR:?'FIO_TESTDIR is required. Did you source the env.sh from the fiotests directory?'}
+FIO_RESULTS=${FIO_RESULTS:?'FIO_RESULTS is required. Did you source the env.sh from the fiotests directory?'}
+
+for fioconf in $(cd ${FIO_CONFDIR} ; ls *.fio | grep -v global)
+do
+  testname=${fioconf%-*.fio}
+  testtype=${testname%-*}
+  fiofiles="${testtype}-global.fio $fioconf"
+  echo "name:$testname type:$testtype  fiofiles: $fiofiles"
+
+  (cd ${FIO_CONFDIR} ; cat $fiofiles) | \
+  (cd ${FIO_DATADIR} ; fio - --eta=always --output ${FIO_RESULTS}/$fioconf.out )
+done
