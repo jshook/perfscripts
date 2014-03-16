@@ -1,0 +1,29 @@
+seqwrite: (g=0): rw=write, bs=1M-1M/1M-1M/1M-1M, ioengine=libaio, iodepth=10
+fio-2.1.4
+Starting 1 process
+
+seqwrite: (groupid=0, jobs=1): err= 0: pid=5097: Sat Mar 15 07:58:16 2014
+  write: io=20481MB, bw=325141KB/s, iops=317, runt= 64503msec
+    slat (usec): min=647, max=1112, avg=746.16, stdev=81.32
+    clat (usec): min=3, max=8918, avg=6734.65, stdev=730.37
+     lat (usec): min=705, max=9887, avg=7481.16, stdev=805.81
+    clat percentiles (usec):
+     |  1.00th=[ 6240],  5.00th=[ 6240], 10.00th=[ 6304], 20.00th=[ 6304],
+     | 30.00th=[ 6368], 40.00th=[ 6368], 50.00th=[ 6432], 60.00th=[ 6496],
+     | 70.00th=[ 6560], 80.00th=[ 6752], 90.00th=[ 8160], 95.00th=[ 8384],
+     | 99.00th=[ 8512], 99.50th=[ 8640], 99.90th=[ 8768], 99.95th=[ 8768],
+     | 99.99th=[ 8896]
+    bw (MB  /s): min=    0, max= 1434, per=100.00%, avg=1169.89, stdev=457.00
+    lat (usec) : 4=0.01%, 10=0.01%, 750=0.02%
+    lat (msec) : 2=0.02%, 4=0.06%, 10=99.88%
+  cpu          : usr=7.62%, sys=29.08%, ctx=14508, majf=0, minf=26
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=99.9%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.1%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued    : total=r=0/w=20481/d=0, short=r=0/w=0/d=0
+
+Run status group 0 (all jobs):
+  WRITE: io=20481MB, aggrb=325140KB/s, minb=325140KB/s, maxb=325140KB/s, mint=64503msec, maxt=64503msec
+
+Disk stats (read/write):
+  xvdc: ios=0/476794, merge=0/4766098, ticks=0/7036145, in_queue=7036056, util=76.98%
