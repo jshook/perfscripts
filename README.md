@@ -1,12 +1,12 @@
 perfscripts
 ===========
 
-scripts to quickly measure system baseline performance
+scripts to quickly measure system baseline IO performance
 
 overview
 --------
 
-This is mean to be a quick way to get some comparable performance numbers
+This is meant to be a quick way to get some comparable performance numbers
 from a system. The goal is to be able to clone the repo and do minimal
 configuration before getting results. As well, the set of tests will
 be chosen to be useful for a round assessment of systems, but simple
