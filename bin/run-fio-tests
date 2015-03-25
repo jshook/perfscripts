@@ -3,6 +3,11 @@ FIO_TESTDIR=${FIO_TESTDIR:?'FIO_TESTDIR is required. Did you source the env.sh f
 FIO_RESULTS=${FIO_RESULTS:?'FIO_RESULTS is required. Did you source the env.sh from the fiotests directory?'}
 
 mkdir -p ${FIO_RESULTS}
+if [ ! -d ${FIO_DATADIR} ]
+then
+ echo "directory ${FIO_DATADIR} must exist"
+ exit 2
+fi
 
 for fioconf in $(cd ${FIO_CONFDIR} ; ls *.fio | grep -v global)
 do
