@@ -1,4 +1,5 @@
 [global]
+direct=1
 ioengine=libaio
 size=5G
 filename=seqread-raw-data-5G

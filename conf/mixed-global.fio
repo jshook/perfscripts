@@ -1,4 +1,5 @@
 [global]
+direct=1
 ioengine=libaio
 size=5G
 filename=randread-raw-data-1G
