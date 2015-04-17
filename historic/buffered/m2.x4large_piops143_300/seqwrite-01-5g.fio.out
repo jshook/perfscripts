@@ -1,0 +1,31 @@
+seqwrite: (g=0): rw=write, bs=1M-1M/1M-1M/1M-1M, ioengine=libaio, iodepth=10
+fio-2.1.4
+Starting 1 process
+seqwrite: Laying out IO file(s) (1 file(s) / 5120MB)
+fio: posix_fallocate fails: No space left on device
+
+seqwrite: (groupid=0, jobs=1): err=28 (file:io_u.c:1373, func=io_u error, error=No space left on device): pid=26145: Sat Mar 15 04:32:42 2014
+  write: io=3784.9MB, bw=304402KB/s, iops=298, runt= 12732msec
+    slat (usec): min=201, max=741002, avg=3350.23, stdev=27958.79
+    clat (msec): min=2, max=1324, avg=30.26, stdev=105.14
+     lat (msec): min=13, max=1523, avg=33.62, stdev=116.19
+    clat percentiles (msec):
+     |  1.00th=[   13],  5.00th=[   13], 10.00th=[   13], 20.00th=[   13],
+     | 30.00th=[   13], 40.00th=[   13], 50.00th=[   13], 60.00th=[   13],
+     | 70.00th=[   13], 80.00th=[   13], 90.00th=[   14], 95.00th=[   15],
+     | 99.00th=[  570], 99.50th=[  766], 99.90th=[ 1139], 99.95th=[ 1319],
+     | 99.99th=[ 1319]
+    bw (KB  /s): min= 3292, max=755712, per=100.00%, avg=363694.05, stdev=351756.11
+    lat (msec) : 4=0.03%, 20=95.05%, 50=1.19%, 100=0.24%, 250=0.21%
+    lat (msec) : 500=1.37%, 750=1.08%, 1000=0.37%, 2000=0.21%
+  cpu          : usr=5.92%, sys=35.50%, ctx=505, majf=0, minf=60
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=99.8%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued    : total=r=0/w=3795/d=0, short=r=0/w=0/d=0
+
+Run status group 0 (all jobs):
+  WRITE: io=3784.9MB, aggrb=304401KB/s, minb=304401KB/s, maxb=304401KB/s, mint=12732msec, maxt=12732msec
+
+Disk stats (read/write):
+  xvdf: ios=0/4137, merge=0/41790, ticks=0/1104589, in_queue=1126324, util=61.18%
