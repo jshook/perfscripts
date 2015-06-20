@@ -25,7 +25,7 @@ do
   (cd ${FIO_CONFDIR} ; cat $fiofiles) | \
   (cd ${FIO_DATADIR} ; fio - --eta=always --output ${FIO_RESULTS}/$fioconf.out )
 
-  if (( cycle >= cycles )) ; then echo "stopping at cycle $cycle" ; break ; fi
+  if (( cycle >= cycles )) ; then echo ; echo "stopping at cycle $cycle" ; break ; fi
   echo
 
 done
