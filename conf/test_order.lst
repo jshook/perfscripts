@@ -1,4 +1,7 @@
-# incrementally get finer results.
+# The tests have been arranged in increasing order of detail.
+# This means that you can get useful information in 10 minutes.
+# The further you let the test script run, the more detailed the results.
+# By default, each test runs for 60 seconds, unbuffered.
 
 seqwrite-200-32g.fio
 seqread-100-32g.fio
@@ -13,7 +16,12 @@ mixed-307-1to4k_uncapped.fio
 mixed-401-8to16k_10Mseq.fio
 mixed-407-8to16k_uncapped.fio
 
-# stop here for short test
+# The first 10 tests above are very basic
+
+randread-002-2k.fio
+randread-006-32k.fio
+randread-010-512k.fio
+randread-014-8M.fio
 
 mixed-501-32to64k_10Mseq.fio
 mixed-507-32to64k_uncapped.fio
@@ -22,12 +30,13 @@ mixed-607-128to256k_uncapped.fio
 mixed-701-512Kto1M_10Mseq.fio
 mixed-707-512Kto1M_uncapped.fio
 
-randread-002-2k.fio
-randread-006-32k.fio
-randread-010-512k.fio
-randread-014-8M.fio
+# 20 tests - still a very sparse test
 
-# stop here for medium test
+randread-001-1k.fio
+randread-003-4k.fio
+randread-005-16k.fio
+randread-007-64k.fio
+randread-009-256k.fio
 
 mixed-304-1to4k_80Mseq.fio
 mixed-404-8to16k_80Mseq.fio
@@ -35,11 +44,8 @@ mixed-504-32to64k_80Mseq.fio
 mixed-604-128to256k_80Mseq.fio
 mixed-704-512Kto1M_80Mseq.fio
 
-randread-001-1k.fio
-randread-003-4k.fio
-randread-005-16k.fio
-randread-007-64k.fio
-randread-009-256k.fio
+# 30 tests
+
 randread-011-1M.fio
 randread-013-4M.fio
 randread-015-16M.fio
@@ -68,3 +74,5 @@ mixed-702-512Kto1M_20Mseq.fio
 mixed-703-512Kto1M_40Mseq.fio
 mixed-705-512Kto1M_120Mseq.fio
 mixed-706-512Kto1M_160Mseq.fio
+
+# 53 tests total. This will run in less than 60 minutes.
