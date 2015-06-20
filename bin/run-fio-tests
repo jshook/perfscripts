@@ -9,8 +9,14 @@ then
  exit 2
 fi
 
-for fioconf in $(cd ${FIO_CONFDIR} ; ls *.fio | grep -v global)
+export cycle=0
+export cycles=100
+if [ -n "$1" ] ; then cycles=$1 ; echo "stopping after $cycles tests" ; fi
+
+#for fioconf in $(cd ${FIO_CONFDIR} ; ls *.fio | grep -v global)
+for fioconf in $(cat ${FIO_CONFDIR}/test_order.lst | egrep -v '^ *$|^ *#')
 do
+  (( cycle += 1 ))
   testname=${fioconf%-*.fio}
   testtype=${testname%-*}
   fiofiles="${testtype}-global.fio $fioconf"
@@ -18,6 +24,8 @@ do
 
   (cd ${FIO_CONFDIR} ; cat $fiofiles) | \
   (cd ${FIO_DATADIR} ; fio - --eta=always --output ${FIO_RESULTS}/$fioconf.out )
+
+  if (( cycle >= cycles )) ; then echo "stopping at cycle $cycle" ; break ; fi
   echo
 
 done
