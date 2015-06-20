@@ -1,0 +1,4 @@
+[randread-128k]
+rw=randread
+bs=128k
+

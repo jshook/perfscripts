@@ -2,8 +2,8 @@
 direct=1
 ioengine=libaio
 size=5G
-filename=randread-raw-data-1G
-filesize=1G
+filename=randread-raw-data-5G
+filesize=5G
 iodepth=10
 exitall
 time_based

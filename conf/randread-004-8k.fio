@@ -1,0 +1,4 @@
+[randread-8k]
+rw=randread
+bs=8k
+

@@ -1,6 +1,6 @@
-[randread-1k]
+[randread-512k-1m]
 rw=randread
-bsrange=8k-16k
+bsrange=512k-1m
 
 [seqread]
 rate=10m

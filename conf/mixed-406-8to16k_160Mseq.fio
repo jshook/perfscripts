@@ -1,12 +1,14 @@
-[randread-1k-5k]
+[randread-8k-16k]
 rw=randread
-bsrange=1k-4k
+bsrange=8k-16k
 
 [seqread]
+rate=160m
 rw=read
 bs=1m
 
 [seqwrite]
+rate=160m
 rw=write
 bs=1m
 

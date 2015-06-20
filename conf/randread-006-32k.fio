@@ -1,0 +1,4 @@
+[randread-32k]
+rw=randread
+bs=32k
+
