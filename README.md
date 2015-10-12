@@ -21,4 +21,21 @@ dependencies
 usage
 ----
 
-Modify env.sh to fit your system paths, and source it into your shell, then bin/run-fio-tests
+Modify env.sh to fit your system paths, and source it into your shell, then
+
+    bin/run-fio-tests
+
+The full test battery will run 53 full-speed microbenchmarks, with IO workloads
+simulating various levels of streaming reads, writes, random reads, and combinations
+of these.
+
+quick tests
+-----------
+
+If you want to run an partial set of tests, you can use the syntax
+
+    bin/run-fio-tests 10
+
+This will run the most basic tests first, filling in gaps in the results as the tests continue.
+Details on the test order are in [test_order.lst](conf/test_order.lst)
+
