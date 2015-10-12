@@ -29,6 +29,8 @@ The full test battery will run 53 full-speed microbenchmarks, with IO workloads
 simulating various levels of streaming reads, writes, random reads, and combinations
 of these.
 
+Each test is also coded with a test id, to make cross-comparisons and discussion easier.
+
 quick tests
 -----------
 
