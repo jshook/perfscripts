@@ -9,6 +9,8 @@ then
  exit 2
 fi
 
+cp ${FIO_CONFDIR}/README.md ${FIO_RESULTS}
+
 export cycle=0
 export cycles=100
 if [ -n "$1" ] ; then cycles=$1 ; echo "stopping after $cycles tests" ; fi
