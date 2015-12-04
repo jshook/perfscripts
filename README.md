@@ -23,6 +23,8 @@ usage
 
 Modify env.sh to fit your system paths, and source it into your shell, then
 
+    vi env.sh
+    . env.sh
     bin/run-fio-tests
 
 The full test battery will run 53 full-speed microbenchmarks, with IO workloads
