@@ -1,0 +1,73 @@
+randread-128k-256k: (g=0): rw=randread, bs=128K-256K/128K-256K/128K-256K, ioengine=libaio, iodepth=10
+seqread: (g=0): rw=read, bs=1M-1M/1M-1M/1M-1M, ioengine=libaio, iodepth=10
+seqwrite: (g=0): rw=write, bs=1M-1M/1M-1M/1M-1M, ioengine=libaio, iodepth=10
+fio-2.1.3
+Starting 3 processes
+
+randread-128k-256k: (groupid=0, jobs=1): err= 0: pid=2311: Fri May 27 18:17:59 2016
+  read : io=79492MB, bw=1324.9MB/s, iops=7860, runt= 60002msec
+    slat (usec): min=9, max=56853, avg=41.16, stdev=114.68
+    clat (usec): min=246, max=380144, avg=1229.28, stdev=3021.78
+     lat (usec): min=305, max=380161, avg=1270.54, stdev=3033.60
+    clat percentiles (usec):
+     |  1.00th=[  612],  5.00th=[  716], 10.00th=[  764], 20.00th=[  836],
+     | 30.00th=[  892], 40.00th=[  948], 50.00th=[ 1012], 60.00th=[ 1080],
+     | 70.00th=[ 1208], 80.00th=[ 1384], 90.00th=[ 1624], 95.00th=[ 1976],
+     | 99.00th=[ 2736], 99.50th=[ 3664], 99.90th=[21632], 99.95th=[73216],
+     | 99.99th=[119296]
+    bw (MB  /s): min=   18, max= 1525, per=91.38%, avg=1320.28, stdev=316.07
+    lat (usec) : 250=0.01%, 500=0.17%, 750=7.99%, 1000=40.59%
+    lat (msec) : 2=46.53%, 4=4.26%, 10=0.19%, 20=0.15%, 50=0.04%
+    lat (msec) : 100=0.05%, 250=0.02%, 500=0.01%
+  cpu          : usr=1.59%, sys=33.53%, ctx=336421, majf=0, minf=138
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=100.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.1%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued    : total=r=471654/w=0/d=0, short=r=0/w=0/d=0
+seqread: (groupid=0, jobs=1): err= 0: pid=2312: Fri May 27 18:17:59 2016
+  read : io=7204.0MB, bw=122936KB/s, iops=120, runt= 60006msec
+    slat (usec): min=78, max=82070, avg=303.23, stdev=1469.65
+    clat (usec): min=585, max=373562, avg=5925.62, stdev=21903.55
+     lat (usec): min=799, max=453168, avg=6229.50, stdev=22184.33
+    clat percentiles (usec):
+     |  1.00th=[  772],  5.00th=[  916], 10.00th=[  972], 20.00th=[ 1048],
+     | 30.00th=[ 1112], 40.00th=[ 1160], 50.00th=[ 1208], 60.00th=[ 1272],
+     | 70.00th=[ 1352], 80.00th=[ 1544], 90.00th=[ 5216], 95.00th=[22144],
+     | 99.00th=[110080], 99.50th=[124416], 99.90th=[342016], 99.95th=[370688],
+     | 99.99th=[374784]
+    bw (KB  /s): min=73728, max=193015, per=8.32%, avg=123087.47, stdev=12135.47
+    lat (usec) : 750=0.85%, 1000=11.58%
+    lat (msec) : 2=71.00%, 4=5.29%, 10=3.55%, 20=2.10%, 50=1.93%
+    lat (msec) : 100=2.42%, 250=1.15%, 500=0.14%
+  cpu          : usr=0.20%, sys=3.57%, ctx=13489, majf=0, minf=525
+  IO depths    : 1=87.0%, 2=1.6%, 4=3.1%, 8=8.4%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued    : total=r=7204/w=0/d=0, short=r=0/w=0/d=0
+seqwrite: (groupid=0, jobs=1): err= 0: pid=2313: Fri May 27 18:17:59 2016
+  write: io=7203.0MB, bw=122933KB/s, iops=120, runt= 59999msec
+    slat (usec): min=76, max=57723, avg=349.80, stdev=892.96
+    clat (usec): min=643, max=388353, avg=6861.69, stdev=22405.10
+     lat (msec): min=1, max=388, avg= 7.21, stdev=22.50
+    clat percentiles (usec):
+     |  1.00th=[ 1176],  5.00th=[ 1336], 10.00th=[ 1432], 20.00th=[ 1560],
+     | 30.00th=[ 1688], 40.00th=[ 1784], 50.00th=[ 1896], 60.00th=[ 2024],
+     | 70.00th=[ 2192], 80.00th=[ 2512], 90.00th=[ 8768], 95.00th=[22656],
+     | 99.00th=[107008], 99.50th=[125440], 99.90th=[358400], 99.95th=[378880],
+     | 99.99th=[387072]
+    bw (KB  /s): min=65405, max=185625, per=100.00%, avg=123045.55, stdev=11254.88
+    lat (usec) : 750=0.03%, 1000=0.07%
+    lat (msec) : 2=57.60%, 4=28.49%, 10=4.73%, 20=3.33%, 50=1.53%
+    lat (msec) : 100=2.97%, 250=1.11%, 500=0.14%
+  cpu          : usr=0.79%, sys=3.86%, ctx=13784, majf=0, minf=11
+  IO depths    : 1=87.4%, 2=1.3%, 4=2.6%, 8=8.7%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued    : total=r=0/w=7203/d=0, short=r=0/w=0/d=0
+
+Run status group 0 (all jobs):
+   READ: io=86696MB, aggrb=1444.9MB/s, minb=122935KB/s, maxb=1324.9MB/s, mint=60002msec, maxt=60006msec
+  WRITE: io=7203.0MB, aggrb=122933KB/s, minb=122933KB/s, maxb=122933KB/s, mint=59999msec, maxt=59999msec
+
+Disk stats (read/write):
+  nvme0n1: ios=1171388/64800, merge=0/0, ticks=1674412/390280, in_queue=2064912, util=99.91%
