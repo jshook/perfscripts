@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 # Just a simple perl script to extract some data for csv plotting
+# cat historic/.../results/randread-00*.fio.out | bin/proc.pl
 
 print "blocksize,p99_us,aggrb_kbs,iops\n";
 
