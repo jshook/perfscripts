@@ -9,7 +9,7 @@ then
  exit 2
 fi
 
-cp ${FIO_CONFDIR}/README.md ${FIO_RESULTS}
+cp ${FIO_CONFDIR}/_README.md ${FIO_RESULTS}
 
 export cycle=0
 export cycles=100
