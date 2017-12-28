@@ -1,0 +1,39 @@
+Started building sites ...
+Built site for language en:
+0 draft content
+0 future content
+0 expired content
+3 regular pages created
+10 other pages created
+0 non-page files copied
+0 paginator pages created
+0 tags created
+0 categories created
+total in 6 ms
+Watching for changes in /Users/sebastianestevez/Desktop/simple-startup-and-docs/docsrc/{content,static,themes}
+Serving pages from memory
+Web Server is available at http://localhost:1313/ (bind address 127.0.0.1)
+Press Ctrl+C to stop
+
+Change detected, rebuilding site
+2017-12-28 17:56 -0500
+Template changed "/Users/sebastianestevez/Desktop/simple-startup-and-docs/docsrc/themes/hugo-material-docs/layouts/404.html": REMOVE
+Template changed "/Users/sebastianestevez/Desktop/simple-startup-and-docs/docsrc/themes/hugo-material-docs/layouts/_default/__list.html": REMOVE
+Template changed "/Users/sebastianestevez/Desktop/simple-startup-and-docs/docsrc/themes/hugo-material-docs/layouts/_default": REMOVE|WRITE
+Template changed "/Users/sebastianestevez/Desktop/simple-startup-and-docs/docsrc/themes/hugo-material-docs/layouts/index.html": REMOVE
+Template changed "/Users/sebastianestevez/Desktop/simple-startup-and-docs/docsrc/themes/hugo-material-docs/layouts/partials/annotatorjs1.html": REMOVE
+Template changed "/Users/sebastianestevez/Desktop/simple-startup-and-docs/docsrc/themes/hugo-material-docs/layouts/partials": REMOVE|WRITE
+Template changed "/Users/sebastianestevez/Desktop/simple-startup-and-docs/docsrc/themes/hugo-material-docs/layouts": REMOVE|WRITE
+Template changed "/Users/sebastianestevez/Desktop/simple-startup-and-docs/docsrc/themes/hugo-material-docs/layouts/shortcodes/button.html": REMOVE
+Template changed "/Users/sebastianestevez/Desktop/simple-startup-and-docs/docsrc/themes/hugo-material-docs/layouts/shortcodes": REMOVE|WRITE
+Built site for language en:
+0 draft content
+0 future content
+0 expired content
+3 regular pages created
+10 other pages created
+0 non-page files copied
+0 paginator pages created
+0 tags created
+0 categories created
+total in 14 ms

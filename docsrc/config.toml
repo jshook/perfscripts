@@ -1,0 +1,35 @@
+languageCode = "en-us"
+title = "Geofinder API"
+theme = "hugo-material-docs"
+metadataformat = "yaml"
+canonifyurls = true
+
+[params]
+	description = "Asset Name"
+
+	logo = "images/asset-hub.svg"
+	favicon = "/images/asset-hub.png"
+
+[params.palette]
+    primary = "grey"
+    accent  = "teal"
+
+[params.font]
+    text = "Roboto"
+    code = "Roboto Mono"
+
+[blackfriday]
+	smartypants	= true
+	fractions = true
+	smartDashes = true
+	plainIDAnchors = true
+
+
+[[menu.main]]
+	name   = "Asset Name"
+	url    = "/"
+	weight = 10
+[[menu.main]]
+    name   = "Build and Run"
+    url    = "buildandrun/"
+    weight = 100

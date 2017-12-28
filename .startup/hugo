@@ -1,0 +1,27 @@
+#!/bin/bash
+IP=$(ifconfig | awk '/inet/ { print $2 }' | egrep -v '^fe|^127|^192|^172|::' | head -1)
+IP=${IP#addr:}
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    IP=localhost
+fi
+
+if [ -x /usr/bin/hugo ] && ! [ -x "$(command -v hugo)" ] ; then
+ HUGO_VERSION=0.20.2
+ DL_SUFFIX=Linux-64bit
+ INNER_SUFFIX=linux_amd64
+ wget -P /tmp/ https://github.com/spf13/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_${DL_SUFFIX}.tar.gz
+ tar -xvf /tmp/hugo_${HUGO_VERSION}_${DL_SUFFIX}.tar.gz -C /tmp
+ sudo mv /tmp/hugo_${HUGO_VERSION}_${INNER_SUFFIX}/hugo_${HUGO_VERSION}_${INNER_SUFFIX} /usr/bin/hugo
+ sudo chmod +x /usr/bin/hugo
+fi
+
+git submodule update --init
+git submodule sync
+
+rm -rf docsrc/public 
+
+sudo pkill -f hugo
+
+cd docsrc && nohup hugo serve --appendPort --baseUrl "http://${IP}/" &

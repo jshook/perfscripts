@@ -1,0 +1,180 @@
+#!/bin/bash
+
+# If you are looking for docs on this script, consult https://github.com/jshook/simple-startup
+# or, preferably, just run ./startup
+
+# functions
+containsElement () {
+  local e
+  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+  return 1
+}
+
+# locate non-relative script dir
+MAIN_SCRIPT_BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# normalize path to script
+MAIN_SCRIPT="${MAIN_SCRIPT_BASEDIR}/"$( basename $0 )
+EXECUTION_DIR=$(dirname ${MAIN_SCRIPT})
+
+
+# locate .startup directory
+MAIN_SCRIPT_DIRNAME=$(dirname $MAIN_SCRIPT)
+if [ "${MAIN_SCRIPT_DIRNAME}" = ".startup" ]
+then export COMPONENTS_DIRNAME="${MAIN_SCRIPT_DIRNAME}"
+else export COMPONENTS_DIRNAME="${MAIN_SCRIPT_DIRNAME}/.startup"
+fi
+
+# sanity check for only one startup script
+if [ -f "${COMPONENTS_DIRNAME}/startup" -a -f "${COMPONENTS_DIRNAME}/../startup" ]
+then
+ printf "ERROR: You must choose where to put your one and only 'startup' script.\n"
+ printf "You have one in both locations below:\n%s\n%s\n" "${COMPONENTS_DIRNAME}/startup" "${COMPONENTS_DIRNAME}/../startup"
+ exit 2
+fi
+
+if [ ! -d "${COMPONENTS_DIRNAME}" ]
+then
+ printf "ERROR: component scripts directory '${COMPONENTS_DIRNAME}' does not exist.\n"
+ exit 2
+fi
+
+##
+## Initialize known component scripts array
+##
+component_scriptnames_ary=()
+
+SCRIPT_DATA=$(cd $COMPONENTS_DIRNAME; /bin/ls)
+while read -r line
+do
+ if [ "$line" = "startup.order" ] ; then continue ; fi
+ if [ "$line" = "startup" ] ; then continue ; fi
+ if [ ! -x "${COMPONENTS_DIRNAME}/$line" ] ; then continue ; fi
+ if [ -z "$line" ] ; then continue; fi
+ component_scriptnames_ary+=("$line")
+done <<< "$SCRIPT_DATA"
+#printf "DEBUG: component_scriptname: %s\n" "${component_scriptnames_ary[@]}" 1>&2
+
+##
+## Initialize ordered components array
+##
+component_order_ary=()
+
+export ORDER_FILE="${COMPONENTS_DIRNAME}/startup.order"
+if [ -f "${ORDER_FILE}" ]
+then
+ # printf "DEBUG: loading order file: %s\n" "${ORDER_FILE}" 1>&2
+ ORDER_DATA=$(cat ${ORDER_FILE})
+ while read -r line
+ do
+  if [ "$line" = "startup.order" ] ; then continue ; fi
+  if [ "$line" = "startup" ] ; then continue ; fi
+#  if [ "${line:0:1}" = "3" ] ; then line= ${line#\#}; fi
+  component_order_ary+=("$line")
+  line=${line#\#}
+  COMPONENT_SCRIPT="${COMPONENTS_DIRNAME}/$line"
+  if [ ! -x "${COMPONENT_SCRIPT}" ]
+  then
+   printf "ERROR: component startup script '${COMPONENT_SCRIPT}' is not executable or it is missing.\n";
+   printf "ERROR: (it was referenced in the startup.order file in ${COMPONENTS_DIRNAME} )\n";
+   exit 2
+  fi
+ done <<< "${ORDER_DATA}"
+
+  # verify that all named components found in script form
+  # exist in the startup.order file
+ for component_scriptname in "${component_scriptnames_ary[@]}"
+ do
+#  printf "checking %s for ordering membership.\n" "$component_scriptname" 1>&2
+  if ! containsElement "${component_scriptname}" "${component_order_ary[@]}" && ! containsElement "#${component_scriptname}" "${component_order_ary[@]}"
+  then
+   printf "ERROR: There is a startup.order file, but script '${component_scriptname}' is not listed in it.\n"
+   exit 2
+  fi
+ done
+else
+ component_order_ary=("${component_scriptnames_ary[@]}")
+fi
+#printf "DEBUG: component_order: %s\n" "${component_order_ary[@]}" 1>&2
+
+# warn if no component scripts found
+if [ "${#component_order_ary[@]}" -eq 0 ]
+then
+ printf "ERROR: There are no executable scripts in ${COMPONENTS_DIRNAME}\n";
+ exit 2
+fi
+
+if [ ! -f "${ORDER_FILE}" ]
+then
+ printf "# WARNING: Component order is based on filenames.\n" 1>&2
+ printf "# WARNING: Consider adding a startup.order file to control order of startup.\n" 1>&2
+fi
+
+##
+## Initialized selected components array
+##
+selected_components_ary=()
+# printf "DEBUG: arg:[%s]\n" $* 1>&2
+if [ "all" = "$1" ]
+then
+ printf "# INFO: selecting all components\n"; 1>&2
+ selected_components_ary=("${component_order_ary[@]}")
+elif [ ! -z "$1" ]
+then
+ printf "# INFO: selecting specific components: $*\n"; 1>&2
+ selected_components_ary=( "$@" )
+ #do selected_components_ary+=("$line")
+else
+ printf "INFO: You must select from the following available components, or specify 'all':\n" 1>&2
+ printf "%s\n" "${component_order_ary[@]}"
+ exit 0
+fi
+#printf "DEBUG: selected_component: %s\n" "${selected_components_ary[@]}" 1>&2
+
+for selected in "${selected_components_ary[@]}"
+do
+ if ! containsElement "${selected}" "${component_order_ary[@]}" && ! containsElement "#${selected}" "${component_order_ary[@]}"
+ then
+  printf "%s was specified, but no such component could be found.\n" "${selected}"
+  exit 2
+ fi
+done
+
+ordered_components_ary=()
+for component in "${component_order_ary[@]}"
+do
+ component=${component#\#}
+ if containsElement "${component}" "${selected_components_ary[@]}"
+ then ordered_components_ary+=("${component}")
+ else
+  printf "# INFO: component '%s' is being skipped\n" "${component}" 1>&2
+ fi
+done
+
+#printf "component_order_ary: %s\n" "${component_order_ary[@]}" 1>&2
+#printf "ordered_components_ary: %s\n" "${ordered_components_ary[@]}" 1>&2
+
+# execute components in order
+for selected in "${ordered_components_ary[@]}"
+do
+ if containsElement "${selected}" "${component_order_ary[@]}" || containsElement "#${selected}" "${component_order_ary[@]}"
+ then
+  FULL_SCRIPT_PATH="${COMPONENTS_DIRNAME}/${selected}"
+  printf "# INFO: executing: %s\n" "${selected}"
+  export PROJECT_DIRECTORY=$(dirname ${COMPONENTS_DIRNAME})
+  export SELECTED_COMPONENTS="${ordered_components_ary[@]}"
+  export CURRENT_COMPONENT="${selected}"
+  export COMPONENT_SCRIPT="${FULL_SCRIPT_PATH}"
+
+  ( cd ${EXECUTION_DIR} && bash ${FULL_SCRIPT_PATH})
+  last_status=$?
+  if [[ last_status -ne 0 ]]
+  then
+   printf "ERROR: script %s failed with status: %s\n" "${FULL_SCRIPT_PATH}" "${last_status}"
+  fi
+ else
+  printf "ERROR component '%s'  was not found in ${COMPONENTS_DIRNAME}\n" "${selected}"
+  exit 2;
+ fi
+done
+
