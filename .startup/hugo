@@ -24,4 +24,4 @@ rm -rf docsrc/public
 
 sudo pkill -f hugo
 
-cd docsrc && nohup hugo serve --appendPort --baseUrl "http://${IP}/" &
+cd docsrc && nohup hugo serve --bind 0.0.0.0 --appendPort --baseUrl "http://${IP}/" &
