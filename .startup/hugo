@@ -1,6 +1,12 @@
 #!/bin/bash
+set -x
 IP=$(ifconfig | awk '/inet/ { print $2 }' | egrep -v '^fe|^127|^192|^172|::' | head -1)
 IP=${IP#addr:}
+
+if [[ $HOSTNAME == "node"* ]] ; then
+    #rightscale
+    IP=$(grep $(hostname)_ext /etc/hosts | awk '{print $1}')
+fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Mac OSX
@@ -20,8 +26,8 @@ fi
 git submodule update --init
 git submodule sync
 
-rm -rf docsrc/public 
+rm -rf docsrc/public
 
-sudo pkill -f hugo
+sudo kill $(lsof -i:1313 | awk '{print $2}'| grep -v PID)
 
 cd docsrc && nohup hugo serve --bind 0.0.0.0 --appendPort --baseUrl "http://${IP}/" &
