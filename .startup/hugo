@@ -13,7 +13,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     IP=localhost
 fi
 
-if [ -x /usr/bin/hugo ] && ! [ -x "$(command -v hugo)" ] ; then
+if [ ! -x /usr/bin/hugo ] && ! [ -x "$(command -v hugo)" ] ; then
  HUGO_VERSION=0.20.2
  DL_SUFFIX=Linux-64bit
  INNER_SUFFIX=linux_amd64
