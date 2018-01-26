@@ -1,5 +1,5 @@
 languageCode = "en-us"
-title = "Geofinder API"
+title = "Asset Name"
 theme = "hugo-material-docs"
 metadataformat = "yaml"
 canonifyurls = true
