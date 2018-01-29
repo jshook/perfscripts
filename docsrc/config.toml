@@ -3,6 +3,9 @@ title = "Asset Name"
 theme = "hugo-material-docs"
 metadataformat = "yaml"
 canonifyurls = true
+baseUrl = "/"
+
+disableKinds = ["taxonomy","taxonomyTerm"]
 
 [params]
 	description = "Asset Name"
