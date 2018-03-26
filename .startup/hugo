@@ -3,6 +3,10 @@ set -x
 IP=$(ifconfig | awk '/inet/ { print $2 }' | egrep -v '^fe|^127|^192|^172|::' | head -1)
 IP=${IP#addr:}
 
+DL_SUFFIX=Linux-64bit
+INNER_SUFFIX=linux_amd64
+HUGO_VERSION=0.27
+
 if [[ $HOSTNAME == "node"* ]] ; then
     #rightscale
     IP=$(grep $(hostname)_ext /etc/hosts | awk '{print $1}')
@@ -11,15 +15,16 @@ fi
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Mac OSX
     IP=localhost
+    DL_SUFFIX=macOS-64bit
+    INNER_SUFFIX=macos-64bit
 fi
 
 if [ ! -x /usr/bin/hugo ] && ! [ -x "$(command -v hugo)" ] ; then
- HUGO_VERSION=0.20.2
- DL_SUFFIX=Linux-64bit
- INNER_SUFFIX=linux_amd64
+ //https://github.com/gohugoio/hugo/releases/download/v0.27/hugo_0.27_macOS-64bit.tar.gz
  wget -P /tmp/ https://github.com/spf13/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_${DL_SUFFIX}.tar.gz
  tar -xvf /tmp/hugo_${HUGO_VERSION}_${DL_SUFFIX}.tar.gz -C /tmp
- sudo mv /tmp/hugo_${HUGO_VERSION}_${INNER_SUFFIX}/hugo_${HUGO_VERSION}_${INNER_SUFFIX} /usr/bin/hugo
+ sudo mv /tmp/hugo /usr/local/bin/hugo
+ #sudo mv /tmp/hugo_${HUGO_VERSION}_${INNER_SUFFIX}/hugo_${HUGO_VERSION}_${INNER_SUFFIX} /usr/bin/hugo
  sudo chmod +x /usr/bin/hugo
 fi
 
