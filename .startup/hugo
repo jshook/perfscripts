@@ -21,8 +21,8 @@ fi
 
 if [ ! -x /usr/bin/hugo ] && ! [ -x "$(command -v hugo)" ] ; then
  //https://github.com/gohugoio/hugo/releases/download/v0.27/hugo_0.27_macOS-64bit.tar.gz
- wget -P /tmp/ https://github.com/spf13/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_${DL_SUFFIX}.tar.gz
- tar -xvf /tmp/hugo_${HUGO_VERSION}_${DL_SUFFIX}.tar.gz -C /tmp
+ curl -LO https://github.com/spf13/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_${DL_SUFFIX}.tar.gz
+ tar -xvf ./hugo_${HUGO_VERSION}_${DL_SUFFIX}.tar.gz -C /tmp
  sudo mv /tmp/hugo /usr/local/bin/hugo
  #sudo mv /tmp/hugo_${HUGO_VERSION}_${INNER_SUFFIX}/hugo_${HUGO_VERSION}_${INNER_SUFFIX} /usr/bin/hugo
  sudo chmod +x /usr/bin/hugo
