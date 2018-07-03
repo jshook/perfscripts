@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# If you are looking for docs on this script, consult https://github.com/jshook/simple-startup
 # or, preferably, just run ./startup
 
 # functions
@@ -154,6 +153,10 @@ done
 #printf "component_order_ary: %s\n" "${component_order_ary[@]}" 1>&2
 #printf "ordered_components_ary: %s\n" "${ordered_components_ary[@]}" 1>&2
 
+printf "http://localhost:8000"
+exec &> >(tee -a websocketd/startup.out)
+
+# If you are looking for docs on this script, consult https://github.com/jshook/simple-startup
 # execute components in order
 for selected in "${ordered_components_ary[@]}"
 do
