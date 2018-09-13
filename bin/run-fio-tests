@@ -24,8 +24,6 @@ done
 FIO_DATADIR=${FIO_DATADIR:?'data directory is required. Pass it as argument of "-r" parameter'}
 FIO_RESULTS=${FIO_RESULTS:?'results directory is required. Pass it as argument of "-r" parameter'}
 
-echo "$FIO_CONFDIR"
-
 mkdir -p ${FIO_RESULTS}
 if [ ! -d ${FIO_DATADIR} ]
 then
