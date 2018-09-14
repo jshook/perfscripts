@@ -8,6 +8,7 @@ function print_usage() {
 FIO_TOPDIR=`dirname $0`/..
 FIO_CONFDIR=${FIO_TOPDIR}/conf
 FIO_FORMAT=normal
+FIO_RESSUFFIX=out
 
 while getopts ":hd:r:c:" opt; do
     case $opt in
@@ -18,6 +19,7 @@ while getopts ":hd:r:c:" opt; do
         c) FIO_CONFDIR=$OPTARG
            ;;
         j) FIO_FORMAT=json
+           FIO_RESSUFFIX=json
            ;;
         h) print_usage
            ;;
@@ -52,7 +54,7 @@ do
   echo "name:$testname type:$testtype  fiofiles: $fiofiles"
 
   (cd ${FIO_CONFDIR} ; cat $fiofiles) | \
-  (cd ${FIO_DATADIR} ; fio - --eta=always --output-format=${FIO_FORMAT} --output ${FIO_RESULTS}/$fioconf.out )
+  (cd ${FIO_DATADIR} ; fio - --eta=always --output-format=${FIO_FORMAT} --output ${FIO_RESULTS}/$fioconf.${FIO_RESSUFFIX} )
 
   if (( cycle >= cycles )) ; then echo ; echo "stopping at cycle $cycle" ; break ; fi
   echo
