@@ -10,7 +10,7 @@ FIO_CONFDIR=${FIO_TOPDIR}/conf
 FIO_FORMAT=normal
 FIO_RESSUFFIX=out
 
-while getopts ":hd:r:c:" opt; do
+while getopts ":hjd:r:c:" opt; do
     case $opt in
         d) FIO_DATADIR=$OPTARG
            ;;
