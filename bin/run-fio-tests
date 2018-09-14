@@ -1,6 +1,33 @@
 #!/bin/bash
-FIO_TESTDIR=${FIO_TESTDIR:?'FIO_TESTDIR is required. Did you source the env.sh from the fiotests directory?'}
-FIO_RESULTS=${FIO_RESULTS:?'FIO_RESULTS is required. Did you source the env.sh from the fiotests directory?'}
+
+function print_usage() {
+    echo "run-fio-tests [-c config_dir] -r results_dir -d data_dir [number_cycles]"
+    exit 1
+}
+
+FIO_TOPDIR=`dirname $0`/..
+FIO_CONFDIR=${FIO_TOPDIR}/conf
+FIO_FORMAT=normal
+FIO_RESSUFFIX=out
+
+while getopts ":hjd:r:c:" opt; do
+    case $opt in
+        d) FIO_DATADIR=$OPTARG
+           ;;
+        r) FIO_RESULTS=$OPTARG
+           ;;
+        c) FIO_CONFDIR=$OPTARG
+           ;;
+        j) FIO_FORMAT=json
+           FIO_RESSUFFIX=json
+           ;;
+        h) print_usage
+           ;;
+    esac
+done
+
+FIO_DATADIR=${FIO_DATADIR:?'data directory is required. Pass it as argument of "-r" parameter'}
+FIO_RESULTS=${FIO_RESULTS:?'results directory is required. Pass it as argument of "-r" parameter'}
 
 mkdir -p ${FIO_RESULTS}
 if [ ! -d ${FIO_DATADIR} ]
@@ -10,6 +37,8 @@ then
 fi
 
 cp ${FIO_CONFDIR}/_README.md ${FIO_RESULTS}
+
+shift "$(($OPTIND -1))"
 
 export cycle=0
 export cycles=100
@@ -25,7 +54,7 @@ do
   echo "name:$testname type:$testtype  fiofiles: $fiofiles"
 
   (cd ${FIO_CONFDIR} ; cat $fiofiles) | \
-  (cd ${FIO_DATADIR} ; fio - --eta=always --output ${FIO_RESULTS}/$fioconf.out )
+  (cd ${FIO_DATADIR} ; fio - --eta=always --output-format=${FIO_FORMAT} --output ${FIO_RESULTS}/$fioconf.${FIO_RESSUFFIX} )
 
   if (( cycle >= cycles )) ; then echo ; echo "stopping at cycle $cycle" ; break ; fi
   echo
