@@ -20,14 +20,14 @@ dependencies
 Usage
 ----
 
-    bin/run-fio-tests [-c config_dir] -r results_dir -d data_dir [number_cycles]
+    bin/run-fio-tests [-c config_dir] [-j] -r results_dir -d data_dir [number_cycles]
 
 Parameters are:
 
 - `-r` (required) - full path to directory where results will be stored;
 - `-d` (required) - full path to directory where tests will be executed;
-- `-c` (optional) - path to directory with configuration files (`./conf/` by default).
-
+- `-c` (optional) - path to directory with configuration files (`./conf/` by default);
+- `-j` (optional) - output data in the JSON format instead of human-readable.
 
 The full test battery will run 53 full-speed microbenchmarks, with IO workloads simulating
 various levels of streaming reads, writes, random reads, and combinations of these.
