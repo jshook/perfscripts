@@ -48,6 +48,8 @@ If the tests were run on a remote machine you can run:
 	Serving HTTP on 0.0.0.0 port 8000 ...
 	
 
+![screenshot](https://www.dropbox.com/s/1braea66s017s2j/fio_vis.png?dl=1)
+
 Quick tests
 -----------
 
