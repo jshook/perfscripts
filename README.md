@@ -16,6 +16,7 @@ dependencies
 ------------
 
 - [fio](https://github.com/axboe/fio) (could be in the Linux repository as well)
+- On RHEL/Centos systems: `yum install fio`
 
 Usage
 ----
@@ -34,12 +35,27 @@ various levels of streaming reads, writes, random reads, and combinations of the
 
 Each test is also coded with a test id, to make cross-comparisons and discussion easier.
 
+To run all of the tests: 
+	
+	bin/run-fio-tests -r /path/to/results_dir -d /path/to/data_dir 53
+
+In addition of the raw results, you can open up index.html in a browser to see charts of all of the tests that were run. 
+
+If the tests were run on a remote machine you can run:
+	
+	cd /path/to/results_dir
+	python -m SimpleHTTPServer
+	Serving HTTP on 0.0.0.0 port 8000 ...
+	
+
 Quick tests
 -----------
 
 If you want to run an partial set of tests, you can use the syntax
 
-    bin/run-fio-tests -r results_dir -d data_dir 10
+    bin/run-fio-tests -r /path/to/results_dir -d /path/to/data_dir 10
+
+
 
 This will run the most basic tests first, filling in gaps in the results as the tests continue.
 Details on the test order are in [test_order.lst](conf/test_order.lst)

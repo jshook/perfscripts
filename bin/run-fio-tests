@@ -7,8 +7,8 @@ function print_usage() {
 
 FIO_TOPDIR=`dirname $0`/..
 FIO_CONFDIR=${FIO_TOPDIR}/conf
-FIO_FORMAT=normal
-FIO_RESSUFFIX=out
+FIO_FORMAT=json
+FIO_RESSUFFIX=json
 
 while getopts ":hjd:r:c:" opt; do
     case $opt in
@@ -18,15 +18,12 @@ while getopts ":hjd:r:c:" opt; do
            ;;
         c) FIO_CONFDIR=$OPTARG
            ;;
-        j) FIO_FORMAT=json
-           FIO_RESSUFFIX=json
-           ;;
         h) print_usage
            ;;
     esac
 done
 
-FIO_DATADIR=${FIO_DATADIR:?'data directory is required. Pass it as argument of "-r" parameter'}
+FIO_DATADIR=${FIO_DATADIR:?'data directory is required. Pass it as argument of "-d" parameter'}
 FIO_RESULTS=${FIO_RESULTS:?'results directory is required. Pass it as argument of "-r" parameter'}
 
 mkdir -p ${FIO_RESULTS}
@@ -60,3 +57,31 @@ do
   echo
 
 done
+
+
+cd ${FIO_RESULTS}
+
+function join { local IFS="$1"; shift; echo "$*"; }
+
+results=()
+
+for f in *.json
+do
+   if [ "$f" != "files.json" ]; then
+       results+=("\"$f\"")
+   else
+       echo "String not added: $f"
+   fi
+done
+
+echo "[" > files.json
+join , ${results[@]} >> files.json
+echo "]" >> files.json
+
+cp ../templates/ui-bundle.tgz .
+tar -xzf ui-bundle.tgz
+rm ui-bundle.tgz
+
+echo "If this is a remote system you can view the results in a browser with:"
+echo "cd ${FIO_RESULTS}"
+echo "python -m SimpleHTTPServer"
