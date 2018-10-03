@@ -26,4 +26,6 @@ fi
 
 bin/run-fio-tests -r results_dir -d ${DATA_DIR} 53
 
-nohup cd results_dir && python -m SimpleHTTPServer &
+cd results_dir
+
+nohup python -m SimpleHTTPServer &
