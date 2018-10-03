@@ -33,6 +33,10 @@ disableKinds = ["taxonomy","taxonomyTerm"]
 	url    = "/"
 	weight = 10
 [[menu.main]]
+    name   = "How it works"
+    url    = "howitworks/"
+    weight = 100
+[[menu.main]]
     name   = "Build and Run"
     url    = "buildandrun/"
-    weight = 100
+    weight = 200

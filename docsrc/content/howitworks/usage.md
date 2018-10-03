@@ -1,10 +1,10 @@
 ---
 weight: 20
-title: How it works
+title: Usage
 menu:
   main:
       parent: How it works
-      identifier: How it works 
+      identifier: Usage
       weight: 201
 ---
 

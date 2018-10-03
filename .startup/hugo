@@ -19,6 +19,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     INNER_SUFFIX=macos-64bit
 fi
 
+if [[ "$IP" == "" ]]; then
+    IP=localhost
+fi
+
 if [ ! -x /usr/bin/hugo ] && ! [ -x "$(command -v hugo)" ] ; then
  //https://github.com/gohugoio/hugo/releases/download/v0.27/hugo_0.27_macOS-64bit.tar.gz
  curl -LO https://github.com/spf13/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_${DL_SUFFIX}.tar.gz
