@@ -16,7 +16,7 @@ fio is an open source commandline io benchmarking tool, for details see the fio 
 
 ## perfscripts
 
-perfscripts is a bash utility that will run a suite of disk tests using fio and parse the json output response. The entire test suite includes 53 tests and takes about half an hour to run depending on your disks.
+perfscripts is a bash utility that will run a suite of disk tests using fio and parse the json output response. The entire test suite includes 53 tests and takes about an hour and a half to run depending on disk performance.
 
 ## fio vis
 
