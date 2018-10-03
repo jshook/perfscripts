@@ -18,6 +18,6 @@ if [ ! -x /usr/bin/fio ] && ! [ -x "$(command -v fio)" ] ; then
   exit 0
 fi
 
-bin/run-fio-tests -r results_dir -d data_dir 10
+bin/run-fio-tests -r results_dir -d data_dir 53
 
 nohup cd results_dir && python -m SimpleHTTPServer &
