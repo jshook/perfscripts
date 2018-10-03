@@ -1,0 +1,13 @@
+@startuml
+[*] -> Initialized
+
+Initialized --> Starting : Stop Requested\n(set by executor)
+Starting --> Started : Executor started thread\n(signaled by Motor)
+Stopping --> Stopped : Cycle Complete\n(signaled by Motor)
+Started --> Stopping : Stop Requested\n(set by executor)
+Started --> Finished : No Remaining Input\n(signaled by Motor)
+Finished --> [*]
+Stopped --> Starting
+Stopped -> [*]
+
+@enduml

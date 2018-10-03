@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ ! -x /usr/bin/fio ] && ! [ -x "$(command -v fio)" ] ; then
+  if [[ $HOSTNAME == "node"* ]] ; then
+    #rightscale
+    apt-get install -y fio
+  fi
+
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    brew install fio
+  fi
+fi
+
+
+if [ ! -x /usr/bin/fio ] && ! [ -x "$(command -v fio)" ] ; then
+  echo "please install fio manually"
+  exit 0
+fi
+
+bin/run-fio-tests -r results_dir -d data_dir 53
+
+nohup cd results_dir && python -m SimpleHTTPServer &

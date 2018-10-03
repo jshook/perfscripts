@@ -1,4 +1,8 @@
 *.swp
 results/*
 /.DS_Store
+data_dir/
+results_dir/
+websocketd/
+hugo_0.*.tar.gz
 *~
