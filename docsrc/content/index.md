@@ -4,7 +4,7 @@ type: index
 weight: 10
 ---
 
-The fio vis asset (also known as `perfscripts`) is a disk io test harness and visualizer built ontop of the open source io testing tool `fio`.
+The fio vis asset (also known as `perfscripts`) is a disk io test harness and visualizer built ontop of the open source io testing tool `fio`. Note: the full suite takes about 1.5 hours to run depending on disk performance.
 
 ### Motivation
 
