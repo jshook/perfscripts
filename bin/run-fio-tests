@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 
 function print_usage() {
     echo "run-fio-tests [-c config_dir] -r results_dir -d data_dir [number_cycles]"
@@ -37,6 +37,7 @@ if [ -z "${FIO_RESUPGRADE}" ] ; then
     FIO_DATADIR=${FIO_DATADIR:?'data directory is required. Pass it as argument of "-d" parameter'}
 
     mkdir -p ${FIO_RESULTS}
+    mkdir -p ${FIO_DATADIR}
 
     # Make DATADIR work with relative directories
     cd ${FIO_DATADIR}
@@ -45,6 +46,7 @@ if [ -z "${FIO_RESUPGRADE}" ] ; then
     fi
 
     cd ${HOME}
+
 
     if [ ! -d ${FIO_DATADIR} ]
     then

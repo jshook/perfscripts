@@ -6,7 +6,7 @@ set -x
 
 #idempotence
 find websocketd/ ! -name 'startup.out' -type f -exec rm -f {} +
-lsof -i:8000 |grep -i python| awk '{print $2}'| xargs kill -9
+lsof -i:1235 |grep -i python| awk '{print $2}'| xargs kill -9
 lsof -i:1234 |grep -i websocket| awk '{print $2}'| xargs kill -9
 
 mkdir websocketd
@@ -51,4 +51,4 @@ ws.onmessage = function(event) {
 </html>
 EOF
 
-nohup python -m SimpleHTTPServer & ./websocketd --port 1234 tail -1000f ./startup.out &
+nohup python -m SimpleHTTPServer 1235 & ./websocketd --port 1234 tail -1000f ./startup.out &
