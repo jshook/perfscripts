@@ -1,4 +1,4 @@
 *.swp
 results/*
-.gitignore
 /.DS_Store
+*~
