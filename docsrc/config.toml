@@ -1,5 +1,5 @@
 languageCode = "en-us"
-title = "Asset Name"
+title = "fio vis"
 theme = "hugo-material-docs"
 metadataformat = "yaml"
 canonifyurls = true
@@ -8,7 +8,7 @@ baseUrl = "/"
 disableKinds = ["taxonomy","taxonomyTerm"]
 
 [params]
-	description = "Asset Name"
+	description = "fio vis"
 
 	logo = "images/asset-hub.svg"
 	favicon = "/images/asset-hub.png"
@@ -29,7 +29,7 @@ disableKinds = ["taxonomy","taxonomyTerm"]
 
 
 [[menu.main]]
-	name   = "Asset Name"
+	name   = "fio vis"
 	url    = "/"
 	weight = 10
 [[menu.main]]

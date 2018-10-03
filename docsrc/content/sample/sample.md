@@ -1,52 +1,23 @@
 ---
 weight: 20
-title: Sample
+title: How it works
 menu:
   main:
-      parent: Sample
-      identifier: sample
+      parent: How it works
+      identifier: How it works 
       weight: 201
 ---
 
-It's pretty much just markdown
+The tests will run automatically on deploy using the startup scripts. See Build and run.
 
+## FIO
 
-## Titles look like this
+fio is an open source commandline io benchmarking tool, for details see the fio website: https://fio.readthedocs.io/en/latest/
 
-### Subtitles look like this
+## perfscripts
 
-{{< warning >}}
-Warnings look like this
-{{< /warning >}}
+perfscripts is a bash utility that will run a suite of disk tests using fio and parse the json output response.
 
-- lists
-- look
-  - like
-- this
+## fio vis
 
-1. or
-1. like
-1. this
-  1. and
-  1. like
-1. this
-
-[links look like this](https://google.com)
-
-images look like this:
-![images look like this](https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png)
-
-    code block can be indents
-
-```
-or with fancy quotes
-```
-
-~~~
-or squiglies
-~~~
-
-
-{{< note title="Read this first!" >}}
-Notes look like this!
-{{< /note >}}
+fio vis is a web visualizer for perfscripts that allows users to compare their test results with those of other systems.
