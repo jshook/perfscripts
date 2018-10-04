@@ -16,7 +16,8 @@ dependencies
 ------------
 
 - [fio](https://github.com/axboe/fio) (could be in the Linux repository as well)
-- On RHEL/Centos systems: `yum install fio`
+	- Tested with fio 3.1 installed on CentOS 7.4: `yum install fio`
+ 	- **The UI will not work with fio 2.x JSON output**
 
 Usage
 ----
