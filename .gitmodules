@@ -1,0 +1,3 @@
+[submodule "docsrc/themes/hugo-material-docs"]
+	path = docsrc/themes/hugo-material-docs
+	url = https://github.com/jshook/hugo-material-docs.git

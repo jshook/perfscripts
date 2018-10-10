@@ -1,0 +1,42 @@
+languageCode = "en-us"
+title = "fio vis"
+theme = "hugo-material-docs"
+metadataformat = "yaml"
+canonifyurls = true
+baseUrl = "/"
+
+disableKinds = ["taxonomy","taxonomyTerm"]
+
+[params]
+	description = "fio vis"
+
+	logo = "images/asset-hub.svg"
+	favicon = "/images/asset-hub.png"
+
+[params.palette]
+    primary = "grey"
+    accent  = "teal"
+
+[params.font]
+    text = "Roboto"
+    code = "Roboto Mono"
+
+[blackfriday]
+	smartypants	= true
+	fractions = true
+	smartDashes = true
+	plainIDAnchors = true
+
+
+[[menu.main]]
+	name   = "fio vis"
+	url    = "/"
+	weight = 10
+[[menu.main]]
+    name   = "How it works"
+    url    = "howitworks/"
+    weight = 100
+[[menu.main]]
+    name   = "Build and Run"
+    url    = "buildandrun/"
+    weight = 200

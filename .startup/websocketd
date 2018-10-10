@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -x
+
+#https://github.com/joewalnes/websocketd/releases/download/v0.3.0/websocketd-0.3.0-darwin_amd64.zip
+
+#idempotence
+find websocketd/ ! -name 'startup.out' -type f -exec rm -f {} +
+lsof -i:1235 |grep -i python| awk '{print $2}'| xargs kill -9
+lsof -i:1234 |grep -i websocket| awk '{print $2}'| xargs kill -9
+
+mkdir websocketd
+
+cd websocketd
+
+IP=$(ifconfig | awk '/inet/ { print $2 }' | egrep -v '^fe|^127|^192|^172|::' | head -1)
+IP=${IP#addr:}
+
+DL_SUFFIX=linux_amd64
+VERSION=0.3.0
+
+if [[ $HOSTNAME == "node"* ]] ; then
+    #rightscale
+    IP=$(grep $(hostname)_ext /etc/hosts | awk '{print $1}')
+fi
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    DL_SUFFIX=darwin_amd64
+    IP=localhost
+fi
+
+curl -LO https://github.com/joewalnes/websocketd/releases/download/v${VERSION}/websocketd-${VERSION}-${DL_SUFFIX}.zip
+
+unzip websocketd-${VERSION}-${DL_SUFFIX}.zip
+
+cat <<EOF >> ./index.html
+<html>
+<body>
+<div id=log>Loading Log...
+</div>
+</body>
+<script>
+var ws = new WebSocket('ws://${IP}:1234/');
+
+ws.onmessage = function(event) {
+  myLog = document.getElementById("log");
+  myLog.innerText =  event.data + "\n" + myLog.innerText;
+};
+</script>
+</html>
+EOF
+
+nohup python -m SimpleHTTPServer 1235 & ./websocketd --port 1234 tail -1000f ./startup.out &

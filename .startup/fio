@@ -1,0 +1,40 @@
+#!/bin/bash
+
+DATA_DIR=data_dir
+
+FIO_VERSION=3.1
+
+if [[ $HOSTNAME == "node"* ]] ; then
+  DATA_DIR=/mnt/ephemeral
+fi
+
+if [ ! -x /usr/bin/fio ] && ! [ -x "$(command -v fio)" ] ; then
+  if [[ $HOSTNAME == "node"* ]] ; then
+    #rightscale
+    curl -LO https://github.com/axboe/fio/archive/fio-$FIO_VERSION.tar.gz
+    cd /tmp
+    tar -xvf perfscripts/fio-$FIO_VERSION.tar.gz
+    cd /tmp/fio-fio-$FIO_VERSION
+    ./configure
+    make
+    make install
+    cd /tmp/perfscripts
+  fi
+
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    brew install fio
+  fi
+fi
+
+
+if [ ! -x /usr/bin/fio ] && ! [ -x "$(command -v fio)" ] ; then
+  echo "please install fio $FIO_VERSION manually"
+  exit 0
+fi
+
+bin/run-fio-tests -r results_dir -d ${DATA_DIR} 53
+
+cd results_dir
+
+nohup python -m SimpleHTTPServer &

@@ -1,0 +1,40 @@
+@startuml
+title Runtime Execution Cycle for an Activity
+
+start
+
+partition "Thread creation" {
+
+ :executor starts activity threads
+ with the help of the activity's
+ MotorDispenser;
+
+}
+
+partition "for each thread" {
+
+ :stop if input is exhausted;
+ :enter Started state;
+ if (action ISA ActionInitializer) then (yes)
+  :call action.init();
+ endif
+
+ partition "iteration" {
+ :foreach input/
+ if (input < cycle Max?) then (yes)
+  if (State==Started?) then (Started)
+  :apply action(input);
+  :next input/
+  else (Stop Requested)
+  endif
+ else (no)
+ endif
+ :stop motor;
+
+ }
+
+}
+
+
+end
+@enduml
