@@ -11,24 +11,19 @@ fi
 if [ ! -x /usr/bin/fio ] && ! [ -x "$(command -v fio)" ] ; then
   if [[ $HOSTNAME == "node"* ]] ; then
     #rightscale
-    apt-get install -y fio
     curl -LO https://github.com/axboe/fio/archive/fio-$FIO_VERSION.tar.gz
-    tar -xvf /tmp/fio
-    cd /tmp/fio
+    cd /tmp
+    tar -xvf perfscripts/fio-$FIO_VERSION.tar.gz
+    cd /tmp/fio-fio-$FIO_VERSION
     ./configure
     make
     make install
+    cd /tmp/perfscripts
   fi
 
   if [[ "$OSTYPE" == "darwin"* ]]; then
     # Mac OSX
     brew install fio
-    curl -LO https://github.com/axboe/fio/archive/fio-$FIO_VERSION.tar.gz
-    tar -xvf /tmp/fio
-    cd /tmp/fio
-    ./configure
-    make
-    make install
   fi
 fi
 

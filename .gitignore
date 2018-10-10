@@ -6,3 +6,5 @@ results_dir/
 websocketd/
 hugo_0.*.tar.gz
 *~
+fio*.gz
+fio*/
