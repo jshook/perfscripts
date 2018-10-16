@@ -86,7 +86,7 @@ if [ "${FIO_FORMAT}" = "json" ] ; then
 
     results=()
 
-    for f in ${FIO_RESULTS}/*.json
+    for f in `ls ${FIO_RESULTS}/*.json|sort`
     do
         BNAME="`basename $f`"
         if [ "$BNAME" != "files.json" ]; then
