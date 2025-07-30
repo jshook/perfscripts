@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Cross-System Analysis Script
+# Entry point for analyzing perfscripts results
+
+set -e
+
+# Change to script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Check if Maven is available
+if ! command -v mvn &> /dev/null; then
+    echo "Error: Maven is required but not installed."
+    echo "Please install Maven to run the analysis."
+    exit 1
+fi
+
+# Check if Java is available
+if ! command -v java &> /dev/null; then
+    echo "Error: Java is required but not installed."
+    echo "Please install Java 11 or higher to run the analysis."
+    exit 1
+fi
+
+# Compile the project if needed
+if [ ! -d "target/classes" ] || [ "src" -nt "target/classes" ]; then
+    echo "Compiling analysis tool..."
+    mvn compile -q
+fi
+
+# Run the analysis with all passed arguments
+mvn exec:java -Dexec.mainClass="com.jshook.analysis.Main" -Dexec.args="$*" -q
