@@ -10,7 +10,7 @@ Regardless of the implementation stack or language, the command to run a report 
 
 The individual "*.fio.json" files are known as _workloads_. Workload files may have multiple results within them known as _components_.
 
-## Stage 1, Prepare Report target
+## Stage 0, Prepare Report target
 
 If there is already a subdirectory matching the glob 'report_*', then use it. Otherwise create one with the name "report". The report directory should be an optional option "--report-dir", and if it already exists, then the '-U' option for "update" must be provided to avoid accidentally overwriting a previous report, but only if it isn't the default "report" name.
 
