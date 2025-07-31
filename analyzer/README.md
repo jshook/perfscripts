@@ -1,13 +1,16 @@
 # Cross-System Analysis Tool
 
-A comprehensive performance analysis tool for comparing results from different runs of [perfscripts](https://github.com/jshook/perfscripts). Automatically discovers FIO test results, groups systems by common characteristics, and generates detailed performance reports with knee-point analysis and comparative rankings.
+A comprehensive performance analysis tool for comparing results from different runs of [perfscripts](https://github.com/jshook/perfscripts). Automatically discovers FIO test results, groups systems by common characteristics, and generates detailed performance reports with knee-point analysis and **🎯 intelligent multi-dimensional scoring** for advanced system rankings.
 
 ## Key Features
 
 - **Automatic System Discovery**: Intelligently groups test results by system profiles
+- **🎯 Multi-Dimensional Scoring**: Customizable scoring functions balancing throughput, latency, and consistency
+- **📊 JSON Metrics Export**: Structured performance data for programmatic analysis and value functions
 - **Comprehensive Analysis**: Determines optimal blocksizes and performance thresholds
 - **Knee-Point Detection**: Identifies performance degradation points under mixed workloads  
 - **Visual Performance Indicators**: Unicode sparklines show latency progression patterns
+- **🚫 Smart Exclusions**: `.noscan` files to exclude directories from analysis
 - **Multi-Level Reporting**: Individual systems, profile summaries, and cross-profile comparisons
 - **Standardized Output**: JSON and Markdown reports for both human and machine consumption
 
@@ -33,6 +36,9 @@ A comprehensive performance analysis tool for comparing results from different r
 
 # Custom report directory
 ./analyze --report-dir my-performance-analysis
+
+# 🎯 Use custom ranking function
+./analyze --ranking-function throughput-focused
 
 # Update existing report  
 ./analyze --report-dir existing-report -U
@@ -83,7 +89,8 @@ For each system:
 
 ### Stage 4: Cross-Profile Comparisons  
 - Compares key performance indicators across profiles
-- Generates overall system rankings
+- **🎯 Generates intelligent scored rankings** using customizable scoring functions
+- Provides both scored and traditional throughput-based rankings
 - Provides strategic insights for system selection
 
 ## Workload Types Supported
@@ -102,8 +109,10 @@ report/
 ├── manifest.md                        # Human-readable discovery results
 ├── manifest.json                      # Machine-readable manifest
 ├── {profile}__{system}.md             # Individual system analysis
-├── PROFILE_{profile}.md               # Profile summary reports  
-└── CROSS_PROFILE_COMPARISON.md        # Cross-profile comparisons
+├── 📊 {profile}__{system}.json        # System performance metrics (JSON)
+├── PROFILE_{profile}.md               # Profile summary reports
+├── 📊 PROFILE_{profile}.json          # Profile performance metrics (JSON)
+└── CROSS_PROFILE_COMPARISON.md        # Cross-profile comparisons with scoring
 ```
 
 ## Key Performance Insights
@@ -114,10 +123,22 @@ report/
 - **Latency Progressions**: How performance degrades with increased load
 - **System Rankings**: Comparative performance across all systems
 
+### 🎯 Advanced Scoring System (NEW!)
+- **Multi-Dimensional Rankings**: Balances throughput, latency, and consistency
+- **Customizable Weights**: Configure importance of different performance aspects
+- **Threshold Penalties**: Massive score reduction for "no-go" conditions
+- **Value Function Ready**: JSON metrics for automated decision making
+
+### Default Scoring Function
+- **60% Throughput** (logarithmic mapping, higher is better)
+- **30% Latency** (logarithmic mapping, lower is better, penalty for >1ms)  
+- **10% Consistency** (knee-point increase, lower is better, penalty for >50%)
+
 ### Visual Indicators
 - **Unicode Sparklines**: `▁▂▃▄▅▆▇█` show latency progression on logarithmic scale
 - **Performance Classes**: High/Medium/Low classifications for quick assessment
 - **Quantile Panels**: P50/P95/P99 latency comparisons in grid format
+- **📊 Scored Rankings**: Multi-dimensional system rankings with explanations
 
 ## Documentation
 
@@ -131,13 +152,15 @@ report/
 Usage: ./analyze [OPTIONS]
 
 Options:
-  --report-dir DIR  Specify report directory name (default: "report")
-  -U                Update mode - allow overwriting existing report  
-  -h, --help        Show help message
+  --report-dir DIR     Specify report directory name (default: "report")
+  --ranking-function NAME 🎯 Name of ranking function from ranking-functions.json
+  -U                   Update mode - allow overwriting existing report  
+  -h, --help           Show help message
 
 Examples:
-  ./analyze                              # Basic analysis
+  ./analyze                              # Basic analysis with default scoring
   ./analyze --report-dir perf-2024-01    # Custom directory
+  ./analyze --ranking-function latency-focused   # 🎯 Custom ranking function
   ./analyze --report-dir existing -U     # Update existing
 ```
 
@@ -152,8 +175,9 @@ Examples:
 
 - **Language**: Java 17 compatible
 - **Build System**: Maven
-- **Dependencies**: Jackson (JSON processing), minimal external dependencies
+- **Dependencies**: Jackson (JSON processing), JUnit 5 (testing), minimal external dependencies
 - **Output Formats**: Markdown, JSON
+- **🎯 Scoring System**: Well-encapsulated with comprehensive unit tests (11 test scenarios)
 - **Execution**: Command-line tool with shell wrapper
 
 ## Contributing

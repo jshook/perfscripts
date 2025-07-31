@@ -115,6 +115,55 @@ Rankings help identify top performers and outliers:
 
 ## Cross-Profile Comparison Reports
 
+### 🎯 Scored System Rankings (NEW!)
+
+The most sophisticated ranking system using customizable scoring functions:
+
+```markdown
+## Scored System Rankings
+
+### Scoring Function Configuration
+**Description**: Default balanced scoring: 60% throughput, 30% latency, 10% consistency
+
+**Components**: Loaded from ranking-functions.json
+- Available functions: default, throughput-focused, latency-focused, consistency-focused, mixed-workload-focused, comprehensive
+- Use --ranking-function option to specify which function to use
+
+### Scored Rankings
+| Rank | System | Profile | Score | Throughput | Latency | Knee Point | Details |
+```
+
+**Understanding Scored Rankings:**
+- **Score**: Composite performance score (0-1, higher is better)
+- **Multi-Dimensional**: Balances throughput, latency, and consistency
+- **Threshold Penalties**: Systems exceeding thresholds get penalized
+- **Customizable**: Configure scoring to match your priorities
+
+**Reading Component Scores:**
+- **Details Column**: Shows individual metric scores
+- **Score Calculation**: Product of weighted component scores
+- **Zero Scores**: Indicate threshold penalties were applied
+
+### Top 3 System Scoring Details
+
+Detailed explanations for top performers:
+
+```markdown
+#### 1. high_perf_system
+
+Scoring breakdown for high_perf_system:
+- optimal_throughput_mbps: 0.774 (weight: 0.6, raw: 2000.0)
+- optimal_latency_p99_us: 1.000 (weight: 0.3, raw: 100.0)  
+- knee_point_latency_increase_percent: 1.000 (weight: 0.1, raw: 25.0)
+Total Score: 0.857
+```
+
+**Interpreting Scoring Details:**
+- **Component Scores**: Individual metric performance (0-1)
+- **Raw Values**: Original measurements for context
+- **Weight Impact**: How much each metric contributes
+- **Total Score**: Final weighted product
+
 ### Key Performance Indicators by Profile
 
 Compare different system types or generations:
@@ -128,9 +177,9 @@ Compare different system types or generations:
 - **Consistency**: Profiles with smaller throughput ranges are more predictable
 - **Scalability**: How performance varies with system count
 
-### Overall System Rankings
+### Traditional System Rankings (Throughput-Based)
 
-Global view of all systems across profiles:
+For comparison with scored rankings:
 
 ```markdown
 ### Top Performers by Throughput
@@ -138,9 +187,9 @@ Global view of all systems across profiles:
 ```
 
 **Strategic Insights:**
-- **Cross-Profile Winners**: Systems that excel across different configurations
-- **Profile Strengths**: Which profiles dominate top rankings
-- **Performance Gaps**: How much difference between best and worst
+- **Scoring vs Traditional**: How scoring changes rankings
+- **Throughput Bias**: Traditional rankings may miss latency issues
+- **Balanced View**: Scored rankings provide more complete picture
 
 ## Performance Interpretation Guidelines
 
@@ -219,3 +268,80 @@ Global view of all systems across profiles:
 - **Fair Comparisons**: Ensure systems tested under similar conditions
 - **Configuration Differences**: Account for hardware, OS, and tuning differences
 - **Statistical Significance**: Multiple test runs provide better confidence
+
+## 📊 JSON Metrics Files (NEW!)
+
+### System Metrics JSON Files
+
+Each system generates a JSON file with structured performance data:
+
+```json
+{
+  "system_name": "high_perf_system",
+  "system_profile": "nvme_systems", 
+  "optimal_throughput_mbps": 2000.0,
+  "optimal_throughput_gbps": 1.953,
+  "optimal_latency_p99_us": 100.0,
+  "knee_point_latency_increase_percent": 25.0,
+  "analysis_timestamp": "2024-01-15T10:30:00"
+}
+```
+
+**Key Metrics for Value Functions:**
+- **optimal_throughput_mbps**: Peak performance measurement
+- **optimal_latency_p99_us**: Tail latency under optimal conditions
+- **knee_point_latency_increase_percent**: Consistency under load
+- **mixed_workload_***: Performance under mixed I/O patterns
+
+### Profile Metrics JSON Files
+
+Profile-level aggregated metrics:
+
+```json
+{
+  "profile_name": "nvme_systems",
+  "total_systems": 4,
+  "average_throughput_mbps": 1750.0,
+  "maximum_throughput_mbps": 2000.0,
+  "throughput_range_factor": 2.5,
+  "best_system_name": "high_perf_system",
+  "system_names": ["system1", "system2", "system3", "high_perf_system"]
+}
+```
+
+**Using JSON Metrics:**
+- **Automation**: Parse metrics for automated decision making
+- **Value Functions**: Build custom scoring algorithms
+- **Trend Analysis**: Track performance changes over time
+- **Integration**: Feed into monitoring and alerting systems
+
+### Programmatic Analysis Examples
+
+**Python Example - Finding Best Systems:**
+```python
+import json
+import glob
+
+# Load all system metrics
+systems = []
+for file in glob.glob("report/*.json"):
+    if not file.startswith("PROFILE_"):
+        with open(file) as f:
+            systems.append(json.load(f))
+
+# Find systems with best latency
+best_latency = min(systems, key=lambda s: s['optimal_latency_p99_us'])
+print(f"Best latency: {best_latency['system_name']} - {best_latency['optimal_latency_p99_us']}μs")
+```
+
+**Shell Example - Performance Monitoring:**
+```bash
+# Check if any systems exceed latency thresholds
+for file in report/*.json; do
+  latency=$(jq -r '.optimal_latency_p99_us' "$file")
+  system=$(jq -r '.system_name' "$file") 
+  if (( $(echo "$latency > 1000" | bc -l) )); then
+    echo "WARNING: $system has high latency: ${latency}μs"
+  fi
+done
+```

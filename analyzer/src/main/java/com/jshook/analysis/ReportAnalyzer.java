@@ -19,7 +19,7 @@ public class ReportAnalyzer {
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Path currentWorkingDirectory;
-    private ScoringFunction.ScoringConfiguration scoringConfiguration;
+    private String rankingFunctionName;
     
     public ReportAnalyzer() {
         this.currentWorkingDirectory = Paths.get(System.getProperty("user.dir"));
@@ -30,10 +30,10 @@ public class ReportAnalyzer {
     }
     
     /**
-     * Sets a custom scoring configuration for system rankings
+     * Sets a custom ranking function name for system rankings
      */
-    public void setScoringConfiguration(ScoringFunction.ScoringConfiguration configuration) {
-        this.scoringConfiguration = configuration;
+    public void setRankingFunction(String rankingFunctionName) {
+        this.rankingFunctionName = rankingFunctionName;
     }
     
     /**
@@ -1346,8 +1346,8 @@ public class ReportAnalyzer {
         
         // Create and apply scoring function
         ScoringFunction scoringFunction;
-        if (scoringConfiguration != null) {
-            scoringFunction = new ScoringFunction(scoringConfiguration);
+        if (rankingFunctionName != null) {
+            scoringFunction = ScoringFunction.createFromRankingFunctions(rankingFunctionName);
         } else {
             scoringFunction = ScoringFunction.createDefault();
         }

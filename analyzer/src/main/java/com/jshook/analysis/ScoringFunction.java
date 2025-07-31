@@ -1,6 +1,7 @@
 package com.jshook.analysis;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.function.Function;
 
@@ -132,6 +133,59 @@ public class ScoringFunction {
      * Creates a default scoring function focusing on throughput and latency
      */
     public static ScoringFunction createDefault() {
+        return createFromRankingFunctions("default");
+    }
+    
+    /**
+     * Creates a scoring function from the ranking-functions.json file
+     */
+    public static ScoringFunction createFromRankingFunctions(String functionName) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            java.io.InputStream inputStream = ScoringFunction.class.getClassLoader()
+                .getResourceAsStream("ranking-functions.json");
+            
+            // If not found in classpath, try current directory
+            if (inputStream == null) {
+                java.nio.file.Path rankingFunctionsPath = java.nio.file.Paths.get("ranking-functions.json");
+                if (java.nio.file.Files.exists(rankingFunctionsPath)) {
+                    inputStream = java.nio.file.Files.newInputStream(rankingFunctionsPath);
+                }
+            }
+            
+            if (inputStream == null) {
+                System.err.println("Warning: ranking-functions.json not found, using hardcoded default");
+                return createHardcodedDefault();
+            }
+            
+            java.util.Map<String, ScoringConfiguration> rankingFunctions = mapper.readValue(
+                inputStream, 
+                new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, ScoringConfiguration>>() {}
+            );
+            
+            ScoringConfiguration config = rankingFunctions.get(functionName);
+            if (config == null) {
+                System.err.println("Warning: ranking function '" + functionName + "' not found, using 'default'");
+                config = rankingFunctions.get("default");
+                if (config == null) {
+                    System.err.println("Warning: 'default' ranking function not found, using hardcoded default");
+                    return createHardcodedDefault();
+                }
+            }
+            
+            return new ScoringFunction(config);
+            
+        } catch (Exception e) {
+            System.err.println("Error loading ranking functions: " + e.getMessage());
+            System.err.println("Using hardcoded default ranking function");
+            return createHardcodedDefault();
+        }
+    }
+    
+    /**
+     * Creates a hardcoded default scoring function as fallback
+     */
+    private static ScoringFunction createHardcodedDefault() {
         ScoringConfiguration config = new ScoringConfiguration();
         config.setDescription("Default balanced scoring: 60% throughput, 30% latency, 10% consistency");
         
@@ -154,6 +208,39 @@ public class ScoringFunction {
         config.addComponent(consistency);
         
         return new ScoringFunction(config);
+    }
+    
+    /**
+     * Lists available ranking functions from ranking-functions.json
+     */
+    public static java.util.Set<String> getAvailableRankingFunctions() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            java.io.InputStream inputStream = ScoringFunction.class.getClassLoader()
+                .getResourceAsStream("ranking-functions.json");
+            
+            // If not found in classpath, try current directory
+            if (inputStream == null) {
+                java.nio.file.Path rankingFunctionsPath = java.nio.file.Paths.get("ranking-functions.json");
+                if (java.nio.file.Files.exists(rankingFunctionsPath)) {
+                    inputStream = java.nio.file.Files.newInputStream(rankingFunctionsPath);
+                }
+            }
+            
+            if (inputStream == null) {
+                return java.util.Set.of("default");
+            }
+            
+            java.util.Map<String, ScoringConfiguration> rankingFunctions = mapper.readValue(
+                inputStream, 
+                new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, ScoringConfiguration>>() {}
+            );
+            
+            return rankingFunctions.keySet();
+            
+        } catch (Exception e) {
+            return java.util.Set.of("default");
+        }
     }
     
     /**

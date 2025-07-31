@@ -16,7 +16,7 @@ public class Main {
         try {
             String reportDir = null;
             boolean updateMode = false;
-            String scoringConfigFile = null;
+            String rankingFunction = null;
             
             // Parse command line arguments
             for (int i = 0; i < args.length; i++) {
@@ -32,11 +32,11 @@ public class Main {
                     case "-U":
                         updateMode = true;
                         break;
-                    case "--scoring-config":
+                    case "--ranking-function":
                         if (i + 1 < args.length) {
-                            scoringConfigFile = args[++i];
+                            rankingFunction = args[++i];
                         } else {
-                            System.err.println("Error: --scoring-config requires a JSON configuration file path");
+                            System.err.println("Error: --ranking-function requires a ranking function name");
                             System.exit(1);
                         }
                         break;
@@ -52,23 +52,10 @@ public class Main {
                 }
             }
             
-            // Load scoring configuration if provided
-            ScoringFunction.ScoringConfiguration scoringConfig = null;
-            if (scoringConfigFile != null) {
-                Path configPath = Paths.get(scoringConfigFile);
-                if (Files.exists(configPath)) {
-                    ObjectMapper mapper = new ObjectMapper();
-                    scoringConfig = mapper.readValue(configPath.toFile(), ScoringFunction.ScoringConfiguration.class);
-                    System.out.println("Loaded scoring configuration from: " + scoringConfigFile);
-                } else {
-                    System.err.println("Error: Scoring configuration file not found: " + scoringConfigFile);
-                    System.exit(1);
-                }
-            }
-            
             ReportAnalyzer analyzer = new ReportAnalyzer();
-            if (scoringConfig != null) {
-                analyzer.setScoringConfiguration(scoringConfig);
+            if (rankingFunction != null) {
+                analyzer.setRankingFunction(rankingFunction);
+                System.out.println("Using ranking function: " + rankingFunction);
             }
             
             System.out.println("Starting Cross-System Analysis...");
@@ -105,10 +92,10 @@ public class Main {
         System.out.println("Usage: java com.jshook.analysis.Main [OPTIONS]");
         System.out.println();
         System.out.println("Options:");
-        System.out.println("  --report-dir DIR     Specify report directory name");
-        System.out.println("  -U                   Update mode - allow overwriting existing report");
-        System.out.println("  --scoring-config FILE JSON file with custom scoring function configuration");
-        System.out.println("  -h, --help           Show this help message");
+        System.out.println("  --report-dir DIR        Specify report directory name");
+        System.out.println("  -U                      Update mode - allow overwriting existing report");
+        System.out.println("  --ranking-function NAME Name of ranking function from ranking-functions.json");
+        System.out.println("  -h, --help              Show this help message");
         System.out.println();
         System.out.println("Cross-System Analysis tool for comparing perfscripts results.");
     }

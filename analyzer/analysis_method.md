@@ -114,3 +114,9 @@ Key scenarios to support include:
 * Choosing roll-off or easing shapes for thresholds or conditions.
 
 The ranking function logic should be implemented in a well-encapsulated way with very thorough unit tests and examples.
+
+The default ranking functions should be contained in ranking-functions.json.
+This file should contain multiple ranking functions, not just a flat single ranking function.
+The default ranking function should just be named "default", and be selected by default when the user does not provide another, with the --ranking-function option.
+There should be a comprehensive ranking function in the ranking-functions.json file which uses all possible metrics and function options for the purpose of illustration.
+
