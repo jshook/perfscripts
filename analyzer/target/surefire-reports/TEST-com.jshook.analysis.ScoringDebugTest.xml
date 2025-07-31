@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.jshook.analysis.ScoringDebugTest" time="0.064" tests="1" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="24"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/target/test-classes:/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/target/classes:/home/jshook/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.15.2/jackson-databind-2.15.2.jar:/home/jshook/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.15.2/jackson-annotations-2.15.2.jar:/home/jshook/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.15.2/jackson-core-2.15.2.jar:/home/jshook/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.0/junit-jupiter-engine-5.10.0.jar:/home/jshook/.m2/repository/org/junit/platform/junit-platform-engine/1.10.0/junit-platform-engine-1.10.0.jar:/home/jshook/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/jshook/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.0/junit-jupiter-api-5.10.0.jar:/home/jshook/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/jshook/.m2/repository/org/junit/platform/junit-platform-commons/1.10.0/junit-platform-commons-1.10.0.jar:"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="America/Chicago"/>
+    <property name="os.name" value="Linux"/>
+    <property name="java.vm.specification.version" value="24"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="/usr/java/jdk-24.0.1/lib"/>
+    <property name="sun.java.command" value="/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/target/surefire/surefirebooter-20250731104850732_3.jar /home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/target/surefire 2025-07-31T10-48-50_681-jvmRun1 surefire-20250731104850732_1tmp surefire_0-20250731104850732_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/target/test-classes:/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/target/classes:/home/jshook/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.15.2/jackson-databind-2.15.2.jar:/home/jshook/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.15.2/jackson-annotations-2.15.2.jar:/home/jshook/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.15.2/jackson-core-2.15.2.jar:/home/jshook/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.0/junit-jupiter-engine-5.10.0.jar:/home/jshook/.m2/repository/org/junit/platform/junit-platform-engine/1.10.0/junit-platform-engine-1.10.0.jar:/home/jshook/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/jshook/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.0/junit-jupiter-api-5.10.0.jar:/home/jshook/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/jshook/.m2/repository/org/junit/platform/junit-platform-commons/1.10.0/junit-platform-commons-1.10.0.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/home/jshook"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2025-04-15"/>
+    <property name="java.home" value="/usr/java/jdk-24.0.1"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="surefire.real.class.path" value="/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/target/surefire/surefirebooter-20250731104850732_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="24.0.1+9-30"/>
+    <property name="user.name" value="jshook"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="6.14.0-23-generic"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="localRepository" value="/home/jshook/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="java.version" value="24.0.1"/>
+    <property name="user.dir" value="/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib"/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="24.0.1+9-30"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="68.0"/>
+  </properties>
+  <testcase name="debugScoring" classname="com.jshook.analysis.ScoringDebugTest" time="0.049">
+    <system-out><![CDATA[=== TEST SYSTEMS ===
+high_perf: throughput=2000.0 MB/s, latency=100.0 us, knee=25.0%
+medium_perf: throughput=1000.0 MB/s, latency=200.0 us, knee=50.0%
+low_perf: throughput=500.0 MB/s, latency=1000.0 us, knee=75.0%
+high_throughput_bad_latency: throughput=3000.0 MB/s, latency=2000.0 us, knee=150.0%
+
+=== SCORING RESULTS ===
+1. high_perf: score=0.857247
+   Component scores: {optimal_throughput_mbps=0.7735882348492368, knee_point_latency_increase_percent=1.0, optimal_latency_p99_us=1.0}
+   Scoring breakdown for high_perf:
+   - optimal_throughput_mbps: 0.774 (weight: 0.6, raw: 2000.0)
+   - optimal_latency_p99_us: 1.000 (weight: 0.3, raw: 100.0)
+   - knee_point_latency_increase_percent: 1.000 (weight: 0.1, raw: 25.0)
+   Total Score: 0.857
+
+2. medium_perf: score=0.414053
+   Component scores: {optimal_throughput_mbps=0.3866547736720795, knee_point_latency_increase_percent=0.40784313725490196, optimal_latency_p99_us=0.477207417898258}
+   Scoring breakdown for medium_perf:
+   - optimal_throughput_mbps: 0.387 (weight: 0.6, raw: 1000.0)
+   - optimal_latency_p99_us: 0.477 (weight: 0.3, raw: 200.0)
+   - knee_point_latency_increase_percent: 0.408 (weight: 0.1, raw: 50.0)
+   Total Score: 0.414
+
+3. low_perf: score=0.000000
+   Component scores: {optimal_throughput_mbps=0.0, knee_point_latency_increase_percent=0.06157894736842103, optimal_latency_p99_us=0.053340594368367904}
+   Scoring breakdown for low_perf:
+   - optimal_throughput_mbps: 0.000 (weight: 0.6, raw: 500.0)
+   - optimal_latency_p99_us: 0.053 (weight: 0.3, raw: 1000.0)
+   - knee_point_latency_increase_percent: 0.062 (weight: 0.1, raw: 75.0)
+   Total Score: 0.000
+
+4. high_throughput_bad_latency: score=0.000000
+   Component scores: {optimal_throughput_mbps=1.0, knee_point_latency_increase_percent=0.0, optimal_latency_p99_us=0.0}
+   Scoring breakdown for high_throughput_bad_latency:
+   - optimal_throughput_mbps: 1.000 (weight: 0.6, raw: 3000.0)
+   - optimal_latency_p99_us: 0.000 (weight: 0.3, raw: 2000.0)
+   - knee_point_latency_increase_percent: 0.000 (weight: 0.1, raw: 150.0)
+   Total Score: 0.000
+
+]]></system-out>
+  </testcase>
+</testsuite>

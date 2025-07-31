@@ -37,6 +37,7 @@ In order to facilitate proper grouping and labeling of results, the following di
 6. It should be easy to find the "*.fio.json" files for a given system by simply resolving the system path within the system profile path. Within the resolved directory path, the "*.fio.json" files should be visibile.
 8. A manifest.json file is created in the report directory with all these details in hierarchical structure.
 9. A manifest.md file is created in the report directory with the same details, but with a human-friendly layout.
+10. A special exception is provided for explicitly excluding directories from analysis. Simply add a `.noscan` file to any directories which should not be traversed.
 
 ## Stage 2, Single Directory Analysis
 
@@ -74,10 +75,12 @@ Each system's analysis should proceed with these specific steps:
 
 * All of the data use, descriptions, calculations, and results should be shared in the report.
 * The workload name needs to be added to each row 
+* The key metrics for a given system need to be stored in a json file adjacent to the report name for that system. These metrics become available for value function scoring later.
 
 ### System Performance Profile
 
 For stage 3 report generation, each system profile will have details summarized taking data from all of the system reports.
+Like system metrics, the system profile metrics should also be stored in a json file adjacent to the system profile report. These will become available for value function scoring later.
 
 ### Cross Profile Comparisons
 
@@ -86,6 +89,8 @@ It should include:
 * key performance indicators for each system profile
 * a ranking of systems according to their results
 
+The ranking should be based on a scoring function. The scoring function used should be clarified and explained in the report.
+
 ### Documentation
 
 A basic userguid should be created in a docs directory that is kept up-to-date with the implementation
@@ -93,3 +98,19 @@ A guide for interpreting the results should also be added there.
 A README.md file needs to be created to describe the project, it's key features, and a basic example on how to run it.
 The APLv2 needs to be added to this directory.
 
+## Custom Ranking
+
+The scoring function should be customizable and composable from a command line option.
+The scoring function is a typical `maximal value` function, where higher is better.
+
+### Ranking Function Configuration
+
+The ranking function consists of the product of several components.
+Each component is based on a specific metric available, a mapping function to convert it into "positive inflective" form, a normalizing function to bring metrics into a normalized scale, and possible threshold values.
+Key scenarios to support include:
+* selecting latency quantiles and thresholds
+* choosing how much throughput, op rate, or latency matters relative to each other
+* Identifying conditions which are "no go" or which, when triggered, cause a massive reduction in value.
+* Choosing roll-off or easing shapes for thresholds or conditions.
+
+The ranking function logic should be implemented in a well-encapsulated way with very thorough unit tests and examples.

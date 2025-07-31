@@ -5,9 +5,18 @@
 
 set -e
 
-# Change to script directory
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+# Determine the actual script directory (where Maven project lives)
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+
+# Determine working directory (where data files are and where we want to run analysis)
+WORK_DIR="$(pwd)"
+
+# If called via symlink, stay in the current directory for analysis
+# but use the script directory for Maven operations
+if [ "$(readlink -f "${BASH_SOURCE[0]}")" != "${BASH_SOURCE[0]}" ]; then
+    echo "Detected symlink execution. Using current directory for analysis: $WORK_DIR"
+    echo "Using script directory for build operations: $SCRIPT_DIR"
+fi
 
 # Check if Maven is available
 if ! command -v mvn &> /dev/null; then
@@ -23,11 +32,17 @@ if ! command -v java &> /dev/null; then
     exit 1
 fi
 
+# Change to script directory for Maven operations
+cd "$SCRIPT_DIR"
+
 # Compile the project if needed
 if [ ! -d "target/classes" ] || [ "src" -nt "target/classes" ]; then
     echo "Compiling analysis tool..."
     mvn compile -q
 fi
 
-# Run the analysis with all passed arguments
-mvn exec:java -Dexec.mainClass="com.jshook.analysis.Main" -Dexec.args="$*" -q
+# Change back to working directory for analysis execution
+cd "$WORK_DIR"
+
+# Run the analysis with all passed arguments, but specify the script directory for Maven execution
+mvn -f "$SCRIPT_DIR/pom.xml" exec:java -Dexec.mainClass="com.jshook.analysis.Main" -Dexec.args="$*" -q

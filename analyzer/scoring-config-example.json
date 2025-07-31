@@ -1,0 +1,31 @@
+{
+  "description": "Example high-performance focused scoring: 70% throughput, 20% latency, 10% consistency",
+  "components": [
+    {
+      "metric_name": "optimal_throughput_mbps",
+      "weight": 0.7,
+      "mapping_function": "log",
+      "normalization": "minmax",
+      "invert_better": false
+    },
+    {
+      "metric_name": "optimal_latency_p99_us",
+      "weight": 0.2,
+      "mapping_function": "log",
+      "normalization": "minmax",
+      "threshold_value": 500.0,
+      "threshold_penalty": 0.3,
+      "easing_function": "exponential",
+      "invert_better": true
+    },
+    {
+      "metric_name": "knee_point_latency_increase_percent",
+      "weight": 0.1,
+      "mapping_function": "linear",
+      "normalization": "minmax",
+      "threshold_value": 100.0,
+      "threshold_penalty": 0.1,
+      "invert_better": true
+    }
+  ]
+}

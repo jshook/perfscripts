@@ -1,0 +1,12 @@
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/workload/WorkloadFile.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/ScoringFunction.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/workload/FioMetrics.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/SystemPerformanceData.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/Main.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/AnalysisManifest.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/SystemProfileMetrics.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/ReportAnalyzer.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/SystemMetrics.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/FioResult.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/WorkloadAnalyzer.java
+/home/jshook/dswork/customers/cust0729/compares/perfscripts/analyzer/src/main/java/com/jshook/analysis/SparklineGenerator.java

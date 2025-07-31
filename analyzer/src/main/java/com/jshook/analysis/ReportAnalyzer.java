@@ -19,6 +19,7 @@ public class ReportAnalyzer {
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Path currentWorkingDirectory;
+    private ScoringFunction.ScoringConfiguration scoringConfiguration;
     
     public ReportAnalyzer() {
         this.currentWorkingDirectory = Paths.get(System.getProperty("user.dir"));
@@ -26,6 +27,13 @@ public class ReportAnalyzer {
     
     public ReportAnalyzer(Path workingDirectory) {
         this.currentWorkingDirectory = workingDirectory;
+    }
+    
+    /**
+     * Sets a custom scoring configuration for system rankings
+     */
+    public void setScoringConfiguration(ScoringFunction.ScoringConfiguration configuration) {
+        this.scoringConfiguration = configuration;
     }
     
     /**
@@ -85,9 +93,17 @@ public class ReportAnalyzer {
         Files.walk(currentWorkingDirectory, 3)
             .filter(Files::isDirectory)
             .filter(dir -> !dir.getFileName().toString().startsWith("report_"))
+            .filter(dir -> !dir.getFileName().toString().equals("report"))
             .filter(dir -> !dir.getFileName().toString().equals("src"))
             .filter(dir -> !dir.getFileName().toString().equals("target"))
+            .filter(dir -> !dir.getFileName().toString().equals("perfscripts"))
+            .filter(dir -> !dir.getFileName().toString().equals("docs"))
             .filter(dir -> !dir.equals(currentWorkingDirectory))
+            .filter(dir -> {
+                String relativePath = currentWorkingDirectory.relativize(dir).toString();
+                return !relativePath.startsWith("perfscripts/") && !relativePath.startsWith("perfscripts\\");
+            })
+            .filter(this::shouldScanDirectory)
             .filter(this::containsFioJsonFiles)
             .forEach(dir -> {
                 String relativePath = currentWorkingDirectory.relativize(dir).toString();
@@ -111,6 +127,33 @@ public class ReportAnalyzer {
         }
         
         return new AnalysisManifest(systemProfileGroups);
+    }
+    
+    /**
+     * Checks if directory should be scanned (not excluded by .noscan file)
+     * Item #10 from analysis_method.md: directories with .noscan files are excluded
+     */
+    private boolean shouldScanDirectory(Path directory) {
+        try {
+            // Check if the directory itself contains a .noscan file
+            if (Files.exists(directory.resolve(".noscan"))) {
+                return false;
+            }
+            
+            // Check parent directories up to current working directory for .noscan files
+            Path current = directory.getParent();
+            while (current != null && !current.equals(currentWorkingDirectory)) {
+                if (Files.exists(current.resolve(".noscan"))) {
+                    return false;
+                }
+                current = current.getParent();
+            }
+            
+            return true;
+        } catch (Exception e) {
+            // On error, allow scanning (conservative approach)
+            return true;
+        }
     }
     
     /**
@@ -540,11 +583,15 @@ public class ReportAnalyzer {
         // Perform Stage 2 analysis
         report.append("\n## Performance Analysis\n\n");
         
+        SystemMetrics systemMetrics = new SystemMetrics(systemName, systemProfile);
+        systemMetrics.setTotalWorkloads(workloadFiles.size());
+        
         try {
             WorkloadAnalyzer analyzer = new WorkloadAnalyzer();
             WorkloadAnalyzer.SystemAnalysis analysis = analyzer.analyzeSystem(systemDir, workloadFiles);
             
             generateAnalysisReport(report, analysis);
+            extractSystemMetrics(systemMetrics, analysis);
             
         } catch (Exception e) {
             report.append("*Analysis error: ").append(e.getMessage()).append("*\n");
@@ -552,6 +599,59 @@ public class ReportAnalyzer {
         }
         
         Files.write(systemReportPath, report.toString().getBytes());
+        
+        // Save system metrics to JSON file adjacent to report
+        String metricsFilename = systemProfile + "__" + systemName + ".json";
+        Path metricsPath = reportPath.resolve(metricsFilename);
+        try {
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(metricsPath.toFile(), systemMetrics);
+        } catch (Exception e) {
+            System.err.println("Error saving system metrics to JSON: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Extracts system metrics from analysis results for JSON storage
+     */
+    private void extractSystemMetrics(SystemMetrics metrics, WorkloadAnalyzer.SystemAnalysis analysis) {
+        try {
+            WorkloadAnalyzer.WorkloadResult optimalRandread = analysis.getOptimalRandread();
+            if (optimalRandread != null) {
+                FioResult.FioJob job = optimalRandread.getFioResult().getJobs().get(0);
+                FioResult.FioMetrics readMetrics = job.getRead();
+                
+                metrics.setOptimalThroughputMBps(readMetrics.getBandwidth() / 1024.0); // Convert to MB/s
+                metrics.setOptimalIOPS(readMetrics.getIops());
+                metrics.setOptimalBlocksize(optimalRandread.getParameter());
+                metrics.setOptimalLatencyMeanUs(readMetrics.getCompletionLatency().getMean() / 1000.0);
+                metrics.setOptimalLatencyP95Us(readMetrics.getCompletionLatency().getP95() / 1000.0);
+                metrics.setOptimalLatencyP99Us(readMetrics.getCompletionLatency().getP99() / 1000.0);
+            }
+            
+            WorkloadAnalyzer.KneePointAnalysis kneeAnalysis = analysis.getKneePointAnalysis();
+            if (kneeAnalysis.getOptimalMixed() != null && kneeAnalysis.getSubOptimalMixed() != null) {
+                WorkloadAnalyzer.WorkloadResult optimalMixed = kneeAnalysis.getOptimalMixed();
+                WorkloadAnalyzer.WorkloadResult subOptimalMixed = kneeAnalysis.getSubOptimalMixed();
+                
+                FioResult.FioMetrics optimalReadMetrics = optimalMixed.getFioResult().getJobs().get(0).getRead();
+                FioResult.FioMetrics subOptimalReadMetrics = subOptimalMixed.getFioResult().getJobs().get(0).getRead();
+                
+                metrics.setMixedWorkloadOptimalThroughputMBps(optimalReadMetrics.getBandwidth() / 1024.0);
+                metrics.setMixedWorkloadOptimalIOPS(optimalReadMetrics.getIops());
+                metrics.setMixedWorkloadOptimalLatencyP99Us(optimalReadMetrics.getCompletionLatency().getP99() / 1000.0);
+                
+                metrics.setMixedWorkloadSubOptimalThroughputMBps(subOptimalReadMetrics.getBandwidth() / 1024.0);
+                metrics.setMixedWorkloadSubOptimalLatencyP99Us(subOptimalReadMetrics.getCompletionLatency().getP99() / 1000.0);
+                
+                // Calculate knee point latency increase percentage
+                double optimalP99 = optimalReadMetrics.getCompletionLatency().getP99() / 1000.0;
+                double subOptimalP99 = subOptimalReadMetrics.getCompletionLatency().getP99() / 1000.0;
+                double increase = ((subOptimalP99 - optimalP99) / optimalP99) * 100.0;
+                metrics.setKneePointLatencyIncreasePercent(increase);
+            }
+        } catch (Exception e) {
+            System.err.println("Error extracting system metrics: " + e.getMessage());
+        }
     }
     
     /**
@@ -909,6 +1009,9 @@ public class ReportAnalyzer {
             }
         }
         
+        // Create and populate profile metrics
+        SystemProfileMetrics profileMetrics = createProfileMetrics(systemProfileName, systemPerformanceData);
+        
         // Generate summary statistics
         generateProfileSummaryStatistics(report, systemPerformanceData);
         
@@ -916,6 +1019,74 @@ public class ReportAnalyzer {
         generateWithinProfileComparison(report, systemPerformanceData);
         
         Files.write(profileReportPath, report.toString().getBytes());
+        
+        // Save profile metrics to JSON file adjacent to report
+        String metricsFilename = "PROFILE_" + systemProfileName + ".json";
+        Path metricsPath = reportPath.resolve(metricsFilename);
+        try {
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(metricsPath.toFile(), profileMetrics);
+        } catch (Exception e) {
+            System.err.println("Error saving profile metrics to JSON: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Creates profile metrics from system performance data
+     */
+    private SystemProfileMetrics createProfileMetrics(String profileName, Map<String, SystemPerformanceData> systemData) {
+        SystemProfileMetrics metrics = new SystemProfileMetrics(profileName);
+        
+        if (systemData.isEmpty()) {
+            return metrics;
+        }
+        
+        metrics.setTotalSystems(systemData.size());
+        
+        // Collect throughput values
+        List<Double> throughputValues = systemData.values().stream()
+            .mapToDouble(SystemPerformanceData::getOptimalThroughputMBps)
+            .boxed()
+            .collect(Collectors.toList());
+        
+        // Collect latency values
+        List<Double> latencyValues = systemData.values().stream()
+            .mapToDouble(SystemPerformanceData::getOptimalLatencyP99)
+            .boxed()
+            .collect(Collectors.toList());
+        
+        // Calculate throughput statistics
+        double avgThroughput = throughputValues.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        double maxThroughput = throughputValues.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
+        double minThroughput = throughputValues.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
+        
+        metrics.setAverageThroughputMBps(avgThroughput);
+        metrics.setMaximumThroughputMBps(maxThroughput);
+        metrics.setMinimumThroughputMBps(minThroughput);
+        metrics.setThroughputRangeFactor(minThroughput > 0 ? maxThroughput / minThroughput : 0.0);
+        
+        // Calculate latency statistics
+        double avgLatency = latencyValues.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        double maxLatency = latencyValues.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
+        double minLatency = latencyValues.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
+        
+        metrics.setAverageLatencyP99Us(avgLatency);
+        metrics.setBestLatencyP99Us(minLatency);
+        metrics.setWorstLatencyP99Us(maxLatency);
+        metrics.setLatencyRangeFactor(minLatency > 0 ? maxLatency / minLatency : 0.0);
+        
+        // Find best system (highest throughput)
+        String bestSystem = systemData.entrySet().stream()
+            .max((a, b) -> Double.compare(a.getValue().getOptimalThroughputMBps(), b.getValue().getOptimalThroughputMBps()))
+            .map(Map.Entry::getKey)
+            .orElse("unknown");
+        
+        metrics.setBestSystemName(bestSystem);
+        metrics.setBestSystemThroughputMBps(maxThroughput);
+        
+        // Set system names
+        metrics.setSystemNames(new ArrayList<>(systemData.keySet()));
+        
+        return metrics;
     }
     
     /**
@@ -960,7 +1131,10 @@ public class ReportAnalyzer {
         // Generate key performance indicators
         generateCrossProfileKPIs(report, allProfileData);
         
-        // Generate rankings
+        // Generate rankings using scoring function
+        generateScoredSystemRankings(report, reportPath, manifest);
+        
+        // Generate traditional rankings (for comparison)
         generateSystemRankings(report, allProfileData);
         
         Files.write(comparisonReportPath, report.toString().getBytes());
@@ -1140,10 +1314,120 @@ public class ReportAnalyzer {
     }
     
     /**
-     * Generates system rankings across all profiles
+     * Generates scored system rankings using the configurable scoring function
+     */
+    private void generateScoredSystemRankings(StringBuilder report, Path reportPath, AnalysisManifest manifest) {
+        report.append("## Scored System Rankings\n\n");
+        
+        // Load all system metrics from JSON files
+        List<SystemMetrics> allSystemMetrics = new ArrayList<>();
+        for (String systemProfileName : manifest.getSystemProfiles()) {
+            Map<String, Path> systems = manifest.getSystemsForProfile(systemProfileName);
+            
+            for (String systemName : systems.keySet()) {
+                String metricsFilename = systemProfileName + "__" + systemName + ".json";
+                Path metricsPath = reportPath.resolve(metricsFilename);
+                
+                try {
+                    if (Files.exists(metricsPath)) {
+                        SystemMetrics metrics = objectMapper.readValue(metricsPath.toFile(), SystemMetrics.class);
+                        allSystemMetrics.add(metrics);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error loading system metrics from " + metricsFilename + ": " + e.getMessage());
+                }
+            }
+        }
+        
+        if (allSystemMetrics.isEmpty()) {
+            report.append("*No system metrics available for scoring.*\n\n");
+            return;
+        }
+        
+        // Create and apply scoring function
+        ScoringFunction scoringFunction;
+        if (scoringConfiguration != null) {
+            scoringFunction = new ScoringFunction(scoringConfiguration);
+        } else {
+            scoringFunction = ScoringFunction.createDefault();
+        }
+        List<ScoringFunction.ScoringResult> scoringResults = scoringFunction.scoreAndRankSystems(allSystemMetrics);
+        
+        // Add scoring function explanation
+        report.append("### Scoring Function Configuration\n\n");
+        report.append("**Description**: ").append(scoringFunction.getConfiguration().getDescription()).append("\n\n");
+        report.append("**Components**:\n");
+        for (ScoringFunction.ScoringComponent component : scoringFunction.getConfiguration().getComponents()) {
+            report.append("- **").append(component.getMetricName()).append("** (weight: ").append(String.format("%.1f", component.getWeight()));
+            report.append(", mapping: ").append(component.getMappingFunction());
+            if (component.isInvertBetter()) {
+                report.append(", lower is better");
+            }
+            if (component.getThresholdValue() != null) {
+                report.append(", threshold: ").append(String.format("%.1f", component.getThresholdValue()));
+                report.append(", penalty: ").append(String.format("%.1f", component.getThresholdPenalty()));
+            }
+            report.append(")\n");
+        }
+        report.append("\n");
+        
+        // Generate ranked results table
+        report.append("### Scored Rankings\n\n");
+        report.append("| Rank | System | Profile | Score | Throughput | Latency | Knee Point | Details |\n");
+        report.append("|------|--------|---------|-------|------------|---------|------------|----------|\n");
+        
+        int rank = 1;
+        for (ScoringFunction.ScoringResult result : scoringResults) {
+            // Find system profile for this system
+            String systemProfile = allSystemMetrics.stream()
+                .filter(m -> m.getSystemName().equals(result.getSystemName()))
+                .map(SystemMetrics::getSystemProfile)
+                .findFirst()
+                .orElse("unknown");
+                
+            SystemMetrics metrics = allSystemMetrics.stream()
+                .filter(m -> m.getSystemName().equals(result.getSystemName()))
+                .findFirst()
+                .orElse(null);
+            
+            report.append("| ").append(rank++).append(" | ");
+            report.append("`").append(result.getSystemName()).append("` | ");
+            report.append("**").append(systemProfile).append("** | ");
+            report.append(String.format("%.3f", result.getTotalScore())).append(" | ");
+            
+            if (metrics != null) {
+                report.append(String.format("%.1f MB/s", metrics.getOptimalThroughputMBps())).append(" | ");
+                report.append(String.format("%.1f μs", metrics.getOptimalLatencyP99Us())).append(" | ");
+                report.append(String.format("%.1f%%", metrics.getKneePointLatencyIncreasePercent())).append(" | ");
+            } else {
+                report.append("N/A | N/A | N/A | ");
+            }
+            
+            // Add component scores
+            StringBuilder details = new StringBuilder();
+            for (Map.Entry<String, Double> componentEntry : result.getComponentScores().entrySet()) {
+                if (details.length() > 0) details.append(", ");
+                details.append(componentEntry.getKey()).append(":").append(String.format("%.2f", componentEntry.getValue()));
+            }
+            report.append(details.toString()).append(" |\n");
+        }
+        report.append("\n");
+        
+        // Add detailed explanations for top 3 systems
+        report.append("### Top 3 System Scoring Details\n\n");
+        for (int i = 0; i < Math.min(3, scoringResults.size()); i++) {
+            ScoringFunction.ScoringResult result = scoringResults.get(i);
+            report.append("#### ").append(i + 1).append(". ").append(result.getSystemName()).append("\n\n");
+            report.append("```\n").append(result.getExplanation()).append("\n```\n\n");
+        }
+    }
+    
+    /**
+     * Generates system rankings across all profiles (traditional throughput-based)
      */
     private void generateSystemRankings(StringBuilder report, Map<String, Map<String, SystemPerformanceData>> allProfileData) {
-        report.append("## Overall System Rankings\n\n");
+        report.append("## Traditional System Rankings (Throughput-Based)\n\n");
+        report.append("*The following rankings are based purely on throughput for comparison with the scored rankings above.*\n\n");
         
         // Flatten all systems across profiles
         List<SystemPerformanceData> allSystems = allProfileData.values().stream()
