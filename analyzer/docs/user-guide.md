@@ -185,7 +185,7 @@ The tool includes multiple predefined ranking functions optimized for different 
 
 | Function Name | Description | Best For |
 |---------------|-------------|----------|
-| **`realtime`** | Ultra-low latency: 50% P99 latency, 30% mean latency, 20% throughput | Real-time systems, interactive applications |
+| **`realtime`** | Ultra-low latency: 60% P99 latency, 40% throughput | Real-time systems, interactive applications |
 | **`throughput-oriented`** | High-performance: 80% throughput, 15% IOPS, 5% latency | HPC, batch processing, data pipelines |
 | **`balanced`** | Even performance: 33.3% throughput, 33.3% latency, 33.3% consistency | General purpose workloads |
 | **`consistency-oriented`** | Predictable: 40% consistency, 35% P95 latency, 25% throughput | Mission-critical systems |

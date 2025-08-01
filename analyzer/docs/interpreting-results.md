@@ -12,7 +12,7 @@ This section identifies the best-performing blocksize for random read workloads:
 
 ```markdown
 #### All Randread Results (Data Used):
-| Workload Name | Workload File | Blocksize | Throughput (KB/s) | IOPS | Latency P99 (μs) |
+| Workload Name | Workload File | Blocksize | Throughput (KB/s) | IOPS | Latency P99 (ms) |
 ```
 
 **Key Insights:**
@@ -31,7 +31,7 @@ Mixed workloads combine random I/O with sequential streaming, simulating real-wo
 
 ```markdown
 #### Selected Mixed Workload Series Data:
-| Workload Name | Workload File | Series | Streaming Limit | Avg Latency P99 (μs) |
+| Workload Name | Workload File | Series | Streaming Limit | Avg Latency P99 (ms) |
 ```
 
 **Understanding Series:**
@@ -70,7 +70,7 @@ Unicode visualizations showing performance degradation:
 
 ```markdown
 #### Latency Quantile Panel
-| Streaming Limit | P50 μs | P95 μs | P99 μs | P50 | P95 | P99 |
+| Streaming Limit | P50 ms | P95 ms | P99 ms | P50 | P95 | P99 |
 ```
 
 **Sparkline Pattern Interpretation:**

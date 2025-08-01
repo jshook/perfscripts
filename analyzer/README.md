@@ -133,7 +133,7 @@ report/
 
 ### Built-in Ranking Functions
 All ranking functions use metrics from optimal mixed workload components:
-- **realtime**: 50% P99 latency, 30% mean latency, 20% throughput (ultra-low latency focus)
+- **realtime**: 60% P99 latency, 40% throughput (ultra-low latency focus)
 - **throughput-oriented**: 80% throughput, 15% IOPS, 5% latency (high-throughput focus)  
 - **balanced**: 33.3% throughput, 33.3% latency, 33.3% consistency (even performance balance)
 - **consistency-oriented**: 40% consistency, 35% P95 latency, 25% throughput (stable performance focus)

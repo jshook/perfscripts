@@ -19,12 +19,11 @@ graph TD
     B -->|inverse| E[1 / (1 + value)]
     B -->|threshold| F[Binary 0/1]
     
-    C --> G[Normalization]
-    D --> G
-    E --> G
-    F --> G
+    C --> H{Threshold Check}
+    D --> H
+    E --> H
+    F --> H
     
-    G --> H{Threshold Check}
     H -->|Below Threshold| I[Apply Weight]
     H -->|Above Threshold| J[Apply Penalty × Weight]
     
@@ -34,7 +33,6 @@ graph TD
     K --> L[Final Score = ∏(Component^Weight)]
     
     style A fill:#e3f2fd
-    style G fill:#fff3e0
     style H fill:#ffecb3
     style L fill:#e8f5e8
 ```
@@ -45,9 +43,8 @@ The scoring system follows these steps for each metric component:
 
 1. **Extract Raw Value**: Get the metric value from system analysis results
 2. **Apply Mapping Function**: Transform the value using mathematical functions
-3. **Normalize**: Scale values to a common range for fair comparison
-4. **Apply Threshold Penalties**: Reduce scores when critical thresholds are exceeded
-5. **Weight and Combine**: Multiply by component weights and combine into final score
+3. **Apply Threshold Penalties**: Reduce scores when critical thresholds are exceeded
+4. **Weight and Combine**: Apply component weights and combine into final score using product composition
 
 ### Final Score Calculation
 
@@ -65,10 +62,10 @@ All performance metrics are extracted from the **optimal mixed workload** result
 ### Random Read Component Metrics (from optimal mixed workload)
 - `randread_throughput_mbps` - Random read throughput in MB/s (higher is better)
 - `randread_iops` - Random read I/O operations per second (higher is better)
-- `randread_latency_mean_us` - Mean random read latency in microseconds (lower is better)
-- `randread_latency_p50_us` - 50th percentile random read latency in microseconds (lower is better)
-- `randread_latency_p95_us` - 95th percentile random read latency in microseconds (lower is better)
-- `randread_latency_p99_us` - 99th percentile random read latency in microseconds (lower is better)
+- `randread_latency_mean_ms` - Mean random read latency in milliseconds (lower is better)
+- `randread_latency_p50_ms` - 50th percentile random read latency in milliseconds (lower is better)
+- `randread_latency_p95_ms` - 95th percentile random read latency in milliseconds (lower is better)
+- `randread_latency_p99_ms` - 99th percentile random read latency in milliseconds (lower is better)
 - `randread_latency_p99_p50_ratio` - P99/P50 latency ratio indicating tail behavior (lower is better)
 
 ### Sequential Component Metrics (from optimal mixed workload)
@@ -86,10 +83,10 @@ All performance metrics are extracted from the **optimal mixed workload** result
 For backward compatibility, the following legacy names map to randread component metrics:
 - `optimal_throughput_mbps` → `randread_throughput_mbps`
 - `optimal_iops` → `randread_iops`  
-- `optimal_latency_mean_us` → `randread_latency_mean_us`
-- `optimal_latency_p50_us` → `randread_latency_p50_us`
-- `optimal_latency_p95_us` → `randread_latency_p95_us`
-- `optimal_latency_p99_us` → `randread_latency_p99_us`
+- `optimal_latency_mean_us` → `randread_latency_mean_ms`
+- `optimal_latency_p50_us` → `randread_latency_p50_ms`
+- `optimal_latency_p95_us` → `randread_latency_p95_ms`
+- `optimal_latency_p99_us` → `randread_latency_p99_ms`
 - `optimal_latency_p99_p50_ratio` → `randread_latency_p99_p50_ratio`
 
 ## Component Configuration
@@ -110,11 +107,7 @@ Transform raw values before normalization:
 - `threshold`: Binary transformation - returns 1.0 if value > 0, else 0.0
 
 ### Normalization Methods
-Scale values to common range:
-
-- `minmax`: Scale to [0,1] using min/max values across all systems (default)
-- `zscore`: Convert to z-score then apply sigmoid for [0,1] range
-- `none`: No normalization applied
+**Note**: Normalization has been removed from the current implementation. Raw mapped values are used directly.
 
 ### Threshold Configuration
 Apply penalties when performance conditions are not met:
@@ -131,9 +124,8 @@ Apply penalties when performance conditions are not met:
 ```mermaid
 graph LR
     subgraph "realtime"
-        A1[P99 Latency 50%]
-        A2[Mean Latency 30%]
-        A3[Throughput 20%]
+        A1[P99 Latency 60%]
+        A2[Throughput 40%]
     end
     
     subgraph "throughput-oriented"
@@ -167,10 +159,9 @@ graph LR
 
 ### realtime
 **Focus**: Ultra-low latency systems
-- 50% P99 latency weight
-- 30% mean latency weight  
-- 20% throughput weight
-- Strict latency thresholds with penalties
+- 60% P99 latency weight
+- 40% throughput weight
+- Optimized for real-time applications requiring predictable response times
 
 ### throughput-oriented  
 **Focus**: High-throughput data processing
@@ -200,10 +191,9 @@ graph LR
     "description": "Gaming systems: 60% P95 latency, 25% consistency, 15% throughput (from mixed workload components)",
     "components": [
       {
-        "metric_name": "randread_latency_p95_us",
+        "metric_name": "randread_latency_p95_ms",
         "weight": 0.6,
         "mapping_function": "log",
-        "normalization": "minmax",
         "threshold_value": 100.0,
         "threshold_penalty": 0.2,
         "easing_function": "exponential",
@@ -213,7 +203,6 @@ graph LR
         "metric_name": "knee_point_latency_increase_percent", 
         "weight": 0.25,
         "mapping_function": "inverse",
-        "normalization": "minmax",
         "threshold_value": 20.0,
         "threshold_penalty": 0.4,
         "invert_better": true
@@ -222,7 +211,6 @@ graph LR
         "metric_name": "randread_throughput_mbps",
         "weight": 0.15,
         "mapping_function": "log",
-        "normalization": "minmax",
         "invert_better": false
       }
     ]
