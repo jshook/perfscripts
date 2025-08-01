@@ -130,10 +130,12 @@ public class ScoringFunction {
     }
     
     /**
-     * Creates a default scoring function focusing on throughput and latency
+     * Creates a default scoring function using the first function in ranking-functions.json
+     * NOTE: This method is deprecated - use createFromRankingFunctions() directly instead
      */
+    @Deprecated
     public static ScoringFunction createDefault() {
-        return createFromRankingFunctions("default");
+        return createFromRankingFunctions(getFirstRankingFunction());
     }
     
     /**
@@ -142,15 +144,17 @@ public class ScoringFunction {
     public static ScoringFunction createFromRankingFunctions(String functionName) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            java.io.InputStream inputStream = ScoringFunction.class.getClassLoader()
-                .getResourceAsStream("ranking-functions.json");
+            java.io.InputStream inputStream = null;
             
-            // If not found in classpath, try current directory
-            if (inputStream == null) {
-                java.nio.file.Path rankingFunctionsPath = java.nio.file.Paths.get("ranking-functions.json");
-                if (java.nio.file.Files.exists(rankingFunctionsPath)) {
-                    inputStream = java.nio.file.Files.newInputStream(rankingFunctionsPath);
-                }
+            // First try current directory, then classpath
+            java.nio.file.Path rankingFunctionsPath = java.nio.file.Paths.get("ranking-functions.json");
+            if (java.nio.file.Files.exists(rankingFunctionsPath)) {
+                System.out.println("Loading ranking-functions.json from: " + rankingFunctionsPath.toAbsolutePath());
+                inputStream = java.nio.file.Files.newInputStream(rankingFunctionsPath);
+            } else {
+                System.out.println("Loading ranking-functions.json from classpath");
+                inputStream = ScoringFunction.class.getClassLoader()
+                    .getResourceAsStream("ranking-functions.json");
             }
             
             if (inputStream == null) {
@@ -190,12 +194,12 @@ public class ScoringFunction {
         config.setDescription("Default balanced scoring: 60% throughput, 30% latency, 10% consistency");
         
         // Throughput component (higher is better)
-        ScoringComponent throughput = new ScoringComponent("optimal_throughput_mbps", 0.6, false);
+        ScoringComponent throughput = new ScoringComponent("randread_throughput_mbps", 0.6, false);
         throughput.setMappingFunction("log");
         config.addComponent(throughput);
         
         // Latency component (lower is better)
-        ScoringComponent latency = new ScoringComponent("optimal_latency_p99_us", 0.3, true);
+        ScoringComponent latency = new ScoringComponent("randread_latency_p99_us", 0.3, true);
         latency.setMappingFunction("log");
         latency.setThresholdValue(1000.0); // Penalty for >1ms latency
         latency.setThresholdPenalty(0.5);
@@ -216,15 +220,15 @@ public class ScoringFunction {
     public static java.util.Set<String> getAvailableRankingFunctions() {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            java.io.InputStream inputStream = ScoringFunction.class.getClassLoader()
-                .getResourceAsStream("ranking-functions.json");
+            java.io.InputStream inputStream = null;
             
-            // If not found in classpath, try current directory
-            if (inputStream == null) {
-                java.nio.file.Path rankingFunctionsPath = java.nio.file.Paths.get("ranking-functions.json");
-                if (java.nio.file.Files.exists(rankingFunctionsPath)) {
-                    inputStream = java.nio.file.Files.newInputStream(rankingFunctionsPath);
-                }
+            // First try current directory, then classpath
+            java.nio.file.Path rankingFunctionsPath = java.nio.file.Paths.get("ranking-functions.json");
+            if (java.nio.file.Files.exists(rankingFunctionsPath)) {
+                inputStream = java.nio.file.Files.newInputStream(rankingFunctionsPath);
+            } else {
+                inputStream = ScoringFunction.class.getClassLoader()
+                    .getResourceAsStream("ranking-functions.json");
             }
             
             if (inputStream == null) {
@@ -244,6 +248,56 @@ public class ScoringFunction {
     }
     
     /**
+     * Lists available ranking functions excluding any with 'example' in the name
+     */
+    public static java.util.Set<String> getNonExampleRankingFunctions() {
+        return getAvailableRankingFunctions().stream()
+            .filter(name -> !name.toLowerCase().contains("example"))
+            .collect(java.util.stream.Collectors.toSet());
+    }
+    
+    /**
+     * Lists all available ranking functions including examples
+     */
+    public static java.util.Set<String> getAllRankingFunctions() {
+        return getAvailableRankingFunctions();
+    }
+    
+    /**
+     * Gets the first ranking function name from ranking-functions.json (used as default)
+     */
+    public static String getFirstRankingFunction() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            java.io.InputStream inputStream = null;
+            
+            // First try current directory, then classpath
+            java.nio.file.Path rankingFunctionsPath = java.nio.file.Paths.get("ranking-functions.json");
+            if (java.nio.file.Files.exists(rankingFunctionsPath)) {
+                inputStream = java.nio.file.Files.newInputStream(rankingFunctionsPath);
+            } else {
+                inputStream = ScoringFunction.class.getClassLoader()
+                    .getResourceAsStream("ranking-functions.json");
+            }
+            
+            if (inputStream == null) {
+                return "default";
+            }
+            
+            // Use LinkedHashMap to preserve order
+            java.util.Map<String, ScoringConfiguration> rankingFunctions = mapper.readValue(
+                inputStream, 
+                new com.fasterxml.jackson.core.type.TypeReference<java.util.LinkedHashMap<String, ScoringConfiguration>>() {}
+            );
+            
+            return rankingFunctions.keySet().iterator().next();
+            
+        } catch (Exception e) {
+            return "default";
+        }
+    }
+    
+    /**
      * Scores a list of systems and returns ranked results
      */
     public List<ScoringResult> scoreAndRankSystems(List<SystemMetrics> systems) {
@@ -251,23 +305,76 @@ public class ScoringFunction {
             return new ArrayList<>();
         }
         
-        // Extract all metric values for normalization
-        Map<String, List<Double>> metricValues = extractMetricValues(systems);
+        // Separate qualified and disqualified systems
+        List<SystemMetrics> qualifiedSystems = new ArrayList<>();
+        List<SystemMetrics> disqualifiedSystems = new ArrayList<>();
         
-        // Calculate normalized statistics for each metric
-        Map<String, MetricStats> metricStats = calculateMetricStats(metricValues);
-        
-        // Score each system
-        List<ScoringResult> results = new ArrayList<>();
         for (SystemMetrics system : systems) {
-            ScoringResult result = scoreSystem(system, metricStats);
+            if (isSystemQualified(system)) {
+                qualifiedSystems.add(system);
+            } else {
+                disqualifiedSystems.add(system);
+            }
+        }
+        
+        // Score qualified systems (no normalization needed)
+        List<ScoringResult> results = new ArrayList<>();
+        for (SystemMetrics system : qualifiedSystems) {
+            ScoringResult result = scoreSystem(system, null);
             results.add(result);
+        }
+        
+        // Add disqualified systems with zero scores and explanations
+        for (SystemMetrics system : disqualifiedSystems) {
+            ScoringResult disqualifiedResult = createDisqualifiedResult(system);
+            results.add(disqualifiedResult);
         }
         
         // Sort by total score (descending - higher is better)
         results.sort((a, b) -> Double.compare(b.getTotalScore(), a.getTotalScore()));
         
         return results;
+    }
+    
+    /**
+     * Checks if a system is qualified for ranking (has all required metrics with non-zero values)
+     */
+    private boolean isSystemQualified(SystemMetrics system) {
+        for (ScoringComponent component : configuration.getComponents()) {
+            double value = extractMetricValue(system, component.getMetricName());
+            if (value == 0.0) {
+                return false; // Missing or zero metric disqualifies the system
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Creates a result for a disqualified system with explanation
+     */
+    private ScoringResult createDisqualifiedResult(SystemMetrics system) {
+        Map<String, Double> componentScores = new HashMap<>();
+        StringBuilder explanation = new StringBuilder();
+        
+        explanation.append("DISQUALIFIED - ").append(system.getSystemName()).append(":\\n");
+        explanation.append("System disqualified due to missing or zero values for required metrics:\\n");
+        
+        for (ScoringComponent component : configuration.getComponents()) {
+            double value = extractMetricValue(system, component.getMetricName());
+            componentScores.put(component.getMetricName(), 0.0); // All component scores are 0
+            
+            if (value == 0.0) {
+                explanation.append(String.format("- %s: MISSING/ZERO (required for ranking)\\n", 
+                    component.getMetricName()));
+            } else {
+                explanation.append(String.format("- %s: %.3f (weight: %.1f)\\n", 
+                    component.getMetricName(), value, component.getWeight()));
+            }
+        }
+        
+        explanation.append("Total Score: 0.000 (DISQUALIFIED)");
+        
+        return new ScoringResult(system.getSystemName(), 0.0, componentScores, explanation.toString());
     }
     
     /**
@@ -282,17 +389,17 @@ public class ScoringFunction {
         
         for (ScoringComponent component : configuration.getComponents()) {
             double rawValue = extractMetricValue(system, component.getMetricName());
-            if (rawValue == 0.0) continue; // Skip missing metrics
+            // At this point we know the system is qualified, so all metrics should be non-zero
             
-            double componentScore = calculateComponentScore(rawValue, component, metricStats.get(component.getMetricName()));
+            double componentScore = calculateComponentScore(rawValue, component, null);
             componentScores.put(component.getMetricName(), componentScore);
             totalScore *= Math.pow(componentScore, component.getWeight());
             
-            explanation.append(String.format("- %s: %.3f (weight: %.1f, raw: %.1f)\\n", 
+            explanation.append(String.format("- %s: %.6f (weight: %.1f, raw: %.1f)\\n", 
                 component.getMetricName(), componentScore, component.getWeight(), rawValue));
         }
         
-        explanation.append(String.format("Total Score: %.3f", totalScore));
+        explanation.append(String.format("Total Score: %.6f", totalScore));
         
         return new ScoringResult(system.getSystemName(), totalScore, componentScores, explanation.toString());
     }
@@ -304,14 +411,10 @@ public class ScoringFunction {
         // Step 1: Apply mapping function to convert to positive inflective form
         double mappedValue = applyMappingFunction(rawValue, component.getMappingFunction(), component.isInvertBetter());
         
-        // Step 2: Normalize the value
-        double normalizedValue = applyNormalization(mappedValue, component.getNormalization(), stats);
+        // Step 2: Apply threshold penalty if configured
+        double finalValue = applyThresholdPenalty(rawValue, mappedValue, component);
         
-        // Step 3: Apply threshold penalty if configured
-        double finalValue = applyThresholdPenalty(rawValue, normalizedValue, component);
-        
-        // Ensure score is in [0, 1] range
-        return Math.max(0.0, Math.min(1.0, finalValue));
+        return finalValue;
     }
     
     /**
@@ -358,9 +461,9 @@ public class ScoringFunction {
     /**
      * Applies threshold penalty if conditions are triggered
      */
-    private double applyThresholdPenalty(double rawValue, double normalizedValue, ScoringComponent component) {
+    private double applyThresholdPenalty(double rawValue, double mappedValue, ScoringComponent component) {
         if (component.getThresholdValue() == null) {
-            return normalizedValue;
+            return mappedValue;
         }
         
         boolean thresholdTriggered;
@@ -373,10 +476,10 @@ public class ScoringFunction {
         }
         
         if (thresholdTriggered) {
-            return normalizedValue * component.getThresholdPenalty();
+            return mappedValue * component.getThresholdPenalty();
         }
         
-        return normalizedValue;
+        return mappedValue;
     }
     
     /**
@@ -390,11 +493,10 @@ public class ScoringFunction {
             List<Double> values = new ArrayList<>();
             for (SystemMetrics system : systems) {
                 double rawValue = extractMetricValue(system, component.getMetricName());
-                if (rawValue != 0.0) { // Only include non-zero values
-                    // Apply mapping function to get values in comparable space
-                    double mappedValue = applyMappingFunction(rawValue, component.getMappingFunction(), component.isInvertBetter());
-                    values.add(mappedValue);
-                }
+                // All systems passed here should be qualified (non-zero values)
+                // Apply mapping function to get values in comparable space
+                double mappedValue = applyMappingFunction(rawValue, component.getMappingFunction(), component.isInvertBetter());
+                values.add(mappedValue);
             }
             metricValues.put(component.getMetricName(), values);
         }
@@ -408,25 +510,52 @@ public class ScoringFunction {
     private double extractMetricValue(SystemMetrics system, String metricName) {
         switch (metricName.toLowerCase()) {
             case "optimal_throughput_mbps":
-                return system.getOptimalThroughputMBps();
+                return system.getRandreadThroughputMBps();
             case "optimal_throughput_gbps":
-                return system.getOptimalThroughputGBps();
+                return system.getRandreadThroughputMBps() / 1024.0;
             case "optimal_iops":
-                return system.getOptimalIOPS();
+                return system.getRandreadIOPS();
+            case "optimal_latency_mean_ms":
             case "optimal_latency_mean_us":
-                return system.getOptimalLatencyMeanUs();
+                return system.getRandreadLatencyMeanUs();
+            case "optimal_latency_p50_ms":
+            case "optimal_latency_p50_us":
+                return system.getRandreadLatencyP50Us();
+            case "optimal_latency_p95_ms":
             case "optimal_latency_p95_us":
-                return system.getOptimalLatencyP95Us();
+                return system.getRandreadLatencyP95Us();
+            case "optimal_latency_p99_ms":
             case "optimal_latency_p99_us":
-                return system.getOptimalLatencyP99Us();
+                return system.getRandreadLatencyP99Us();
+            case "optimal_latency_p99_p50_ratio":
+                return system.getRandreadLatencyP99P50Ratio();
             case "knee_point_latency_increase_percent":
                 return system.getKneePointLatencyIncreasePercent();
-            case "mixed_workload_optimal_throughput_mbps":
-                return system.getMixedWorkloadOptimalThroughputMBps();
-            case "mixed_workload_optimal_iops":
-                return system.getMixedWorkloadOptimalIOPS();
-            case "mixed_workload_optimal_latency_p99_us":
-                return system.getMixedWorkloadOptimalLatencyP99Us();
+            // Direct access to component metrics from optimal mixed workload
+            case "randread_throughput_mbps":
+                return system.getRandreadThroughputMBps();
+            case "randread_iops":
+                return system.getRandreadIOPS();
+            case "randread_latency_mean_ms":
+            case "randread_latency_mean_us":
+                return system.getRandreadLatencyMeanUs();
+            case "randread_latency_p50_ms":
+            case "randread_latency_p50_us":
+                return system.getRandreadLatencyP50Us();
+            case "randread_latency_p95_ms":
+            case "randread_latency_p95_us":
+                return system.getRandreadLatencyP95Us();
+            case "randread_latency_p99_ms":
+            case "randread_latency_p99_us":
+                return system.getRandreadLatencyP99Us();
+            case "randread_latency_p99_p50_ratio":
+                return system.getRandreadLatencyP99P50Ratio();
+            case "seqread_throughput_mbps":
+                return system.getSeqreadThroughputMBps();
+            case "seqwrite_throughput_mbps":
+                return system.getSeqwriteThroughputMBps();
+            case "optimal_stream_limit_mbps":
+                return system.getOptimalStreamLimitMBps();
             case "total_workloads":
                 return system.getTotalWorkloads();
             default:

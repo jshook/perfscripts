@@ -1,0 +1,191 @@
+{
+  "realtime": {
+    "description": "Real-time systems: 60% P99 latency, 40% throughput (from optimal mixed workload)",
+    "components": [
+      {
+        "metric_name": "randread_latency_p99_us",
+        "weight": 0.6,
+        "mapping_function": "linear",
+        "invert_better": true
+      },
+      {
+        "metric_name": "randread_throughput_mbps",
+        "weight": 0.4,
+        "mapping_function": "linear",
+        "invert_better": false
+      }
+    ]
+  },
+  
+  "throughput-oriented": {
+    "description": "Throughput-oriented: 80% throughput, 15% IOPS, 5% latency (from optimal mixed workload)",
+    "components": [
+      {
+        "metric_name": "randread_throughput_mbps",
+        "weight": 0.8,
+        "mapping_function": "linear",
+        "invert_better": false
+      },
+      {
+        "metric_name": "randread_iops",
+        "weight": 0.15,
+        "mapping_function": "linear",
+        "invert_better": false
+      },
+      {
+        "metric_name": "randread_latency_p99_us",
+        "weight": 0.05,
+        "mapping_function": "inverse",
+        "invert_better": true
+      }
+    ]
+  },
+  
+  "balanced": {
+    "description": "Balanced performance: 33.3% throughput, 33.3% latency, 33.3% consistency (from optimal mixed workload)",
+    "components": [
+      {
+        "metric_name": "randread_throughput_mbps",
+        "weight": 0.333,
+        "mapping_function": "linear",
+        "invert_better": false
+      },
+      {
+        "metric_name": "randread_latency_p99_us",
+        "weight": 0.333,
+        "mapping_function": "linear",
+        "invert_better": true
+      },
+      {
+        "metric_name": "knee_point_latency_increase_percent",
+        "weight": 0.334,
+        "mapping_function": "linear",
+        "invert_better": true
+      }
+    ]
+  },
+  
+  "consistency-oriented": {
+    "description": "Consistency-oriented: 40% consistency, 35% P95 latency, 25% throughput (from optimal mixed workload)",
+    "components": [
+      {
+        "metric_name": "knee_point_latency_increase_percent",
+        "weight": 0.4,
+        "mapping_function": "inverse",
+        "invert_better": true
+      },
+      {
+        "metric_name": "randread_latency_p95_us",
+        "weight": 0.35,
+        "mapping_function": "linear",
+        "invert_better": true
+      },
+      {
+        "metric_name": "randread_throughput_mbps",
+        "weight": 0.25,
+        "mapping_function": "linear",
+        "invert_better": false
+      }
+    ]
+  },
+  
+  "ranking-function-example": {
+    "description": "Example ranking function demonstrating all available metrics from optimal mixed workload components",
+    "components": [
+      {
+        "metric_name": "randread_throughput_mbps",
+        "weight": 0.2,
+        "mapping_function": "linear",
+        "normalization": "minmax",
+        "invert_better": false
+      },
+      {
+        "metric_name": "randread_iops", 
+        "weight": 0.15,
+        "mapping_function": "linear",
+        "normalization": "zscore",
+        "invert_better": false
+      },
+      {
+        "metric_name": "randread_latency_mean_us",
+        "weight": 0.1,
+        "mapping_function": "inverse",
+        "normalization": "minmax",
+        "threshold_value": 150.0,
+        "threshold_penalty": 0.3,
+        "easing_function": "linear",
+        "invert_better": true
+      },
+      {
+        "metric_name": "randread_latency_p50_us",
+        "weight": 0.08,
+        "mapping_function": "linear",
+        "normalization": "minmax",
+        "threshold_value": 50.0,
+        "threshold_penalty": 0.3,
+        "invert_better": true
+      },
+      {
+        "metric_name": "randread_latency_p95_us",
+        "weight": 0.1,
+        "mapping_function": "linear",
+        "normalization": "minmax",
+        "threshold_value": 400.0,
+        "threshold_penalty": 0.4,
+        "easing_function": "exponential",
+        "invert_better": true
+      },
+      {
+        "metric_name": "randread_latency_p99_us",
+        "weight": 0.12,
+        "mapping_function": "linear",
+        "normalization": "minmax",
+        "threshold_value": 1000.0,
+        "threshold_penalty": 0.2,
+        "easing_function": "sigmoid",
+        "invert_better": true
+      },
+      {
+        "metric_name": "randread_latency_p99_p50_ratio", 
+        "weight": 0.08,
+        "mapping_function": "inverse",
+        "normalization": "minmax",
+        "threshold_value": 5.0,
+        "threshold_penalty": 0.4,
+        "easing_function": "linear",
+        "invert_better": true
+      },
+      {
+        "metric_name": "seqread_throughput_mbps",
+        "weight": 0.07,
+        "mapping_function": "linear",
+        "normalization": "minmax",
+        "invert_better": false
+      },
+      {
+        "metric_name": "seqwrite_throughput_mbps",
+        "weight": 0.05,
+        "mapping_function": "linear",
+        "normalization": "minmax",
+        "invert_better": false
+      },
+      {
+        "metric_name": "knee_point_latency_increase_percent",
+        "weight": 0.08,
+        "mapping_function": "threshold",
+        "normalization": "none",
+        "threshold_value": 30.0,
+        "threshold_penalty": 0.1,
+        "easing_function": "linear",
+        "invert_better": true
+      },
+      {
+        "metric_name": "optimal_stream_limit_mbps",
+        "weight": 0.07,
+        "mapping_function": "linear",
+        "normalization": "minmax",
+        "invert_better": false
+      }
+    ]
+  }
+}

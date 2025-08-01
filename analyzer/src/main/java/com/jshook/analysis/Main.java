@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Set;
+import java.util.LinkedHashSet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -16,7 +18,7 @@ public class Main {
         try {
             String reportDir = null;
             boolean updateMode = false;
-            String rankingFunction = null;
+            Set<String> rankingFunctions = new LinkedHashSet<>();
             
             // Parse command line arguments
             for (int i = 0; i < args.length; i++) {
@@ -32,11 +34,19 @@ public class Main {
                     case "-U":
                         updateMode = true;
                         break;
-                    case "--ranking-function":
+                    case "--ranking-functions":
                         if (i + 1 < args.length) {
-                            rankingFunction = args[++i];
+                            String functionArg = args[++i];
+                            // Support comma-separated values
+                            String[] functions = functionArg.split(",");
+                            for (String function : functions) {
+                                String trimmed = function.trim();
+                                if (!trimmed.isEmpty()) {
+                                    rankingFunctions.add(trimmed);
+                                }
+                            }
                         } else {
-                            System.err.println("Error: --ranking-function requires a ranking function name");
+                            System.err.println("Error: --ranking-functions requires one or more ranking function names");
                             System.exit(1);
                         }
                         break;
@@ -53,9 +63,9 @@ public class Main {
             }
             
             ReportAnalyzer analyzer = new ReportAnalyzer();
-            if (rankingFunction != null) {
-                analyzer.setRankingFunction(rankingFunction);
-                System.out.println("Using ranking function: " + rankingFunction);
+            if (!rankingFunctions.isEmpty()) {
+                analyzer.setRankingFunctions(rankingFunctions);
+                System.out.println("Using ranking functions: " + String.join(", ", rankingFunctions));
             }
             
             System.out.println("Starting Cross-System Analysis...");
@@ -94,7 +104,10 @@ public class Main {
         System.out.println("Options:");
         System.out.println("  --report-dir DIR        Specify report directory name");
         System.out.println("  -U                      Update mode - allow overwriting existing report");
-        System.out.println("  --ranking-function NAME Name of ranking function from ranking-functions.json");
+        System.out.println("  --ranking-functions NAME Name(s) of ranking function(s) from ranking-functions.json");
+        System.out.println("                           Supports comma-separated values and multiple occurrences");
+        System.out.println("                           Examples: --ranking-functions default,throughput-oriented");
+        System.out.println("                                    --ranking-functions realtime --ranking-functions balanced");
         System.out.println("  -h, --help              Show this help message");
         System.out.println();
         System.out.println("Cross-System Analysis tool for comparing perfscripts results.");

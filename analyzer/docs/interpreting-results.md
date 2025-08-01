@@ -58,10 +58,11 @@ The most critical section for understanding system behavior under load:
 - **Optimal**: Best performance before quality degradation
 - **Sub-Optimal**: Performance after crossing the threshold
 
-**Key Metrics:**
-- **P99 Latency**: 99th percentile latency (tail latency)
-- **Throughput**: Sustained bandwidth
-- **Latency Increase**: Percentage jump at knee point
+**Key Metrics (from Optimal Mixed Workload Components):**
+- **P99 Latency**: 99th percentile latency from randread component (tail latency)
+- **Throughput**: Sustained bandwidth from randread component
+- **Sequential Throughput**: Read/write throughput from seqread/seqwrite components  
+- **Latency Increase**: Percentage jump at knee point (consistency metric)
 
 ### Latency Progression Sparklines
 
@@ -72,15 +73,35 @@ Unicode visualizations showing performance degradation:
 | Streaming Limit | P50 μs | P95 μs | P99 μs | P50 | P95 | P99 |
 ```
 
+**Sparkline Pattern Interpretation:**
+
+```mermaid
+graph TD
+    A[Sparkline Patterns] --> B[Gradual: ▁▂▃▄▅▆▇█]
+    A --> C[Knee Point: ▁▁▂▇█]
+    A --> D[Stable: ▃▃▃▄▄▄]
+    A --> E[Erratic: ▁▅▂▇▃]
+    
+    B --> B1[Well-behaved scaling<br/>Good for production]
+    C --> C1[Performance cliff<br/>Identify safe limits]
+    D --> D1[Not fully stressed<br/>Can handle more load]
+    E --> E1[Resource contention<br/>Investigate bottlenecks]
+    
+    style B1 fill:#c8e6c9
+    style C1 fill:#ffcdd2
+    style D1 fill:#fff3e0
+    style E1 fill:#ffecb3
+```
+
 **Reading Sparklines:**
 - **Characters**: ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ represent increasing latency
 - **Logarithmic Scale**: Each step represents order-of-magnitude changes
 - **Pattern Recognition**: Look for sudden jumps (knee points)
 
 **What Sparklines Tell You:**
-- **Gradual Increase**: Well-behaved system under increasing load
-- **Sharp Jumps**: System hitting resource limits or contention
-- **Flat Lines**: System not being stressed by the workload
+- **Gradual Increase** `▁▂▃▄▅▆▇█`: Well-behaved system under increasing load
+- **Sharp Jumps** `▁▁▂▇█`: System hitting resource limits or contention
+- **Flat Lines** `▃▃▃▄▄▄`: System not being stressed by the workload
 
 ## System Profile Reports
 
@@ -125,9 +146,9 @@ The most sophisticated ranking system using customizable scoring functions:
 ### Scoring Function Configuration
 **Description**: Default balanced scoring: 60% throughput, 30% latency, 10% consistency
 
-**Components**: Loaded from ranking-functions.json
-- Available functions: default, throughput-focused, latency-focused, consistency-focused, mixed-workload-focused, comprehensive
-- Use --ranking-function option to specify which function to use
+**Components**: Loaded from ranking-functions.json using component metrics from optimal mixed workload
+- Available functions: realtime, throughput-oriented, balanced, consistency-oriented, ranking-function-example
+- Use --ranking-functions option to specify which function(s) to use (supports multiple)
 
 ### Scored Rankings
 | Rank | System | Profile | Score | Throughput | Latency | Knee Point | Details |

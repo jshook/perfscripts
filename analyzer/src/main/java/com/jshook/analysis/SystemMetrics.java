@@ -3,7 +3,8 @@ package com.jshook.analysis;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * System performance metrics for value function scoring
+ * System performance metrics from the optimal mixed workload
+ * All metrics are derived from the winning mixed workload result after knee-point analysis
  */
 public class SystemMetrics {
     @JsonProperty("system_name")
@@ -12,30 +13,37 @@ public class SystemMetrics {
     @JsonProperty("system_profile")
     private String systemProfile;
     
-    @JsonProperty("optimal_throughput_mbps")
-    private double optimalThroughputMBps;
+    // Random read component metrics from optimal mixed workload
+    @JsonProperty("randread_throughput_mbps")
+    private double randreadThroughputMBps;
     
-    @JsonProperty("optimal_throughput_gbps")
-    private double optimalThroughputGBps;
+    @JsonProperty("randread_iops")
+    private double randreadIOPS;
     
-    @JsonProperty("optimal_iops")
-    private double optimalIOPS;
+    @JsonProperty("randread_latency_mean_ms")
+    private double randreadLatencyMeanUs; // Note: field name kept for backward compatibility, but now stores milliseconds
     
-    @JsonProperty("optimal_blocksize")
-    private String optimalBlocksize;
+    @JsonProperty("randread_latency_p50_ms")
+    private double randreadLatencyP50Us; // Note: field name kept for backward compatibility, but now stores milliseconds
     
-    @JsonProperty("optimal_latency_mean_us")
-    private double optimalLatencyMeanUs;
+    @JsonProperty("randread_latency_p95_ms")
+    private double randreadLatencyP95Us; // Note: field name kept for backward compatibility, but now stores milliseconds
     
-    @JsonProperty("optimal_latency_p95_us")
-    private double optimalLatencyP95Us;
+    @JsonProperty("randread_latency_p99_ms")
+    private double randreadLatencyP99Us; // Note: field name kept for backward compatibility, but now stores milliseconds
     
-    @JsonProperty("optimal_latency_p99_us")
-    private double optimalLatencyP99Us;
+    @JsonProperty("randread_latency_p99_p50_ratio")
+    private double randreadLatencyP99P50Ratio;
     
-    @JsonProperty("knee_point_latency_increase_percent")
-    private double kneePointLatencyIncreasePercent;
+    // Sequential read component metrics from optimal mixed workload
+    @JsonProperty("seqread_throughput_mbps")
+    private double seqreadThroughputMBps;
     
+    // Sequential write component metrics from optimal mixed workload
+    @JsonProperty("seqwrite_throughput_mbps")
+    private double seqwriteThroughputMBps;
+    
+    // Mixed workload optimal metrics
     @JsonProperty("mixed_workload_optimal_throughput_mbps")
     private double mixedWorkloadOptimalThroughputMBps;
     
@@ -50,6 +58,19 @@ public class SystemMetrics {
     
     @JsonProperty("mixed_workload_suboptimal_latency_p99_us")
     private double mixedWorkloadSubOptimalLatencyP99Us;
+    
+    // Analysis metrics
+    @JsonProperty("knee_point_latency_increase_percent")
+    private double kneePointLatencyIncreasePercent;
+    
+    @JsonProperty("optimal_stream_limit_mbps")
+    private double optimalStreamLimitMBps;
+    
+    @JsonProperty("optimal_mixed_workload_name")
+    private String optimalMixedWorkloadName;
+    
+    @JsonProperty("optimal_blocksize")
+    private String optimalBlocksize;
     
     @JsonProperty("total_workloads")
     private int totalWorkloads;
@@ -73,31 +94,46 @@ public class SystemMetrics {
     public String getSystemProfile() { return systemProfile; }
     public void setSystemProfile(String systemProfile) { this.systemProfile = systemProfile; }
     
-    public double getOptimalThroughputMBps() { return optimalThroughputMBps; }
-    public void setOptimalThroughputMBps(double optimalThroughputMBps) { 
-        this.optimalThroughputMBps = optimalThroughputMBps;
-        this.optimalThroughputGBps = optimalThroughputMBps / 1024.0;
+    public double getRandreadThroughputMBps() { return randreadThroughputMBps; }
+    public void setRandreadThroughputMBps(double randreadThroughputMBps) { 
+        this.randreadThroughputMBps = randreadThroughputMBps;
     }
     
-    public double getOptimalThroughputGBps() { return optimalThroughputGBps; }
+    public double getRandreadIOPS() { return randreadIOPS; }
+    public void setRandreadIOPS(double randreadIOPS) { this.randreadIOPS = randreadIOPS; }
     
-    public double getOptimalIOPS() { return optimalIOPS; }
-    public void setOptimalIOPS(double optimalIOPS) { this.optimalIOPS = optimalIOPS; }
+    public double getRandreadLatencyMeanUs() { return randreadLatencyMeanUs; }
+    public void setRandreadLatencyMeanUs(double randreadLatencyMeanUs) { this.randreadLatencyMeanUs = randreadLatencyMeanUs; }
     
-    public String getOptimalBlocksize() { return optimalBlocksize; }
-    public void setOptimalBlocksize(String optimalBlocksize) { this.optimalBlocksize = optimalBlocksize; }
+    public double getRandreadLatencyP50Us() { return randreadLatencyP50Us; }
+    public void setRandreadLatencyP50Us(double randreadLatencyP50Us) { 
+        this.randreadLatencyP50Us = randreadLatencyP50Us; 
+        updateLatencyRatio();
+    }
     
-    public double getOptimalLatencyMeanUs() { return optimalLatencyMeanUs; }
-    public void setOptimalLatencyMeanUs(double optimalLatencyMeanUs) { this.optimalLatencyMeanUs = optimalLatencyMeanUs; }
+    public double getRandreadLatencyP95Us() { return randreadLatencyP95Us; }
+    public void setRandreadLatencyP95Us(double randreadLatencyP95Us) { this.randreadLatencyP95Us = randreadLatencyP95Us; }
     
-    public double getOptimalLatencyP95Us() { return optimalLatencyP95Us; }
-    public void setOptimalLatencyP95Us(double optimalLatencyP95Us) { this.optimalLatencyP95Us = optimalLatencyP95Us; }
+    public double getRandreadLatencyP99Us() { return randreadLatencyP99Us; }
+    public void setRandreadLatencyP99Us(double randreadLatencyP99Us) { 
+        this.randreadLatencyP99Us = randreadLatencyP99Us; 
+        updateLatencyRatio();
+    }
     
-    public double getOptimalLatencyP99Us() { return optimalLatencyP99Us; }
-    public void setOptimalLatencyP99Us(double optimalLatencyP99Us) { this.optimalLatencyP99Us = optimalLatencyP99Us; }
+    public double getRandreadLatencyP99P50Ratio() { return randreadLatencyP99P50Ratio; }
+    public void setRandreadLatencyP99P50Ratio(double randreadLatencyP99P50Ratio) { this.randreadLatencyP99P50Ratio = randreadLatencyP99P50Ratio; }
     
-    public double getKneePointLatencyIncreasePercent() { return kneePointLatencyIncreasePercent; }
-    public void setKneePointLatencyIncreasePercent(double kneePointLatencyIncreasePercent) { this.kneePointLatencyIncreasePercent = kneePointLatencyIncreasePercent; }
+    private void updateLatencyRatio() {
+        if (randreadLatencyP50Us > 0 && randreadLatencyP99Us > 0) {
+            this.randreadLatencyP99P50Ratio = randreadLatencyP99Us / randreadLatencyP50Us;
+        }
+    }
+    
+    public double getSeqreadThroughputMBps() { return seqreadThroughputMBps; }
+    public void setSeqreadThroughputMBps(double seqreadThroughputMBps) { this.seqreadThroughputMBps = seqreadThroughputMBps; }
+    
+    public double getSeqwriteThroughputMBps() { return seqwriteThroughputMBps; }
+    public void setSeqwriteThroughputMBps(double seqwriteThroughputMBps) { this.seqwriteThroughputMBps = seqwriteThroughputMBps; }
     
     public double getMixedWorkloadOptimalThroughputMBps() { return mixedWorkloadOptimalThroughputMBps; }
     public void setMixedWorkloadOptimalThroughputMBps(double mixedWorkloadOptimalThroughputMBps) { this.mixedWorkloadOptimalThroughputMBps = mixedWorkloadOptimalThroughputMBps; }
@@ -113,6 +149,18 @@ public class SystemMetrics {
     
     public double getMixedWorkloadSubOptimalLatencyP99Us() { return mixedWorkloadSubOptimalLatencyP99Us; }
     public void setMixedWorkloadSubOptimalLatencyP99Us(double mixedWorkloadSubOptimalLatencyP99Us) { this.mixedWorkloadSubOptimalLatencyP99Us = mixedWorkloadSubOptimalLatencyP99Us; }
+    
+    public double getKneePointLatencyIncreasePercent() { return kneePointLatencyIncreasePercent; }
+    public void setKneePointLatencyIncreasePercent(double kneePointLatencyIncreasePercent) { this.kneePointLatencyIncreasePercent = kneePointLatencyIncreasePercent; }
+    
+    public double getOptimalStreamLimitMBps() { return optimalStreamLimitMBps; }
+    public void setOptimalStreamLimitMBps(double optimalStreamLimitMBps) { this.optimalStreamLimitMBps = optimalStreamLimitMBps; }
+    
+    public String getOptimalMixedWorkloadName() { return optimalMixedWorkloadName; }
+    public void setOptimalMixedWorkloadName(String optimalMixedWorkloadName) { this.optimalMixedWorkloadName = optimalMixedWorkloadName; }
+    
+    public String getOptimalBlocksize() { return optimalBlocksize; }
+    public void setOptimalBlocksize(String optimalBlocksize) { this.optimalBlocksize = optimalBlocksize; }
     
     public int getTotalWorkloads() { return totalWorkloads; }
     public void setTotalWorkloads(int totalWorkloads) { this.totalWorkloads = totalWorkloads; }

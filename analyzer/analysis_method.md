@@ -2,6 +2,37 @@
 
 This document describes the method used to compare the results of different runs of github.com/jshook/perfscripts.
 
+Agents should *NOT* modify this file.
+
+## Analysis Overview
+
+```mermaid
+graph TD
+    A[FIO JSON Files] --> B[Stage 1: System Enumeration]
+    B --> C[Stage 2: Individual System Analysis]
+    C --> D[Stage 3: System Profile Summaries]
+    D --> E[Stage 4: Cross-Profile Comparisons]
+    
+    B --> B1[Group by Profiles]
+    B --> B2[Generate Manifest]
+    
+    C --> C1[Find Optimal Blocksize]
+    C --> C2[Match Mixed Workloads]
+    C --> C3[Knee-Point Analysis]
+    C --> C4[Extract Component Metrics]
+    
+    D --> D1[Aggregate Profile Stats]
+    D --> D2[JSON Metrics Export]
+    
+    E --> E1[Multi-Dimensional Scoring]
+    E --> E2[Cross-Profile Rankings]
+    E --> E3[Performance Insights]
+    
+    style A fill:#e1f5fe
+    style E fill:#c8e6c9
+    style C4 fill:#fff3e0
+```
+
 ## Usage
 
 Regardless of the implementation stack or language, the command to run a report should be simply './analyze'
@@ -9,6 +40,14 @@ Regardless of the implementation stack or language, the command to run a report 
 ## Terms
 
 The individual "*.fio.json" files are known as _workloads_. Workload files may have multiple results within them known as _components_.
+
+## Conventions
+
+When systems or profiles are listed in any report, the order of presentation needs to be explained, even if it is not ordered.
+
+## Organization
+
+At the top of reports, a TOC should be presented, with links to interior sections.
 
 ## Stage 0, Prepare Report target
 
@@ -72,15 +111,98 @@ Each system's analysis should proceed with these specific steps:
    * The latency progression sparklines should represent, on a logorithmic scale, the amount of latency increase from one streaming limit to the next, going up from the lowest limit all the way up to unlimited.
    * There should be a panel of details for this shown between the two workloads, so that a view over the different quantiles is given.
    * A similarly layed-out view should show summary latencies on the same grid pattern below it.
+5. From this point on, the metrics from the "optimal mixed workload" result should be considered the canonical and representative set of metrics for that system.
+6. Further analysis should draw directly from the metrics related to this, and all other metrics should be left as detail only in the system-level report.
+   * This includes all of the associated metrics for the winning workload, like the randread component throughput, ops/s, and latency.
+   * It also has the streaming throughput for the read component and the write component.
+   * All of these metrics are important, as long as the come from the winning mixed workload.
+7. Any metrics used in ranking functions which are missing or zero should automatically disqualify such system and be annotated as such in reports.
 
 * All of the data use, descriptions, calculations, and results should be shared in the report.
 * The workload name needs to be added to each row 
 * The key metrics for a given system need to be stored in a json file adjacent to the report name for that system. These metrics become available for value function scoring later.
 
+Since the fio json output files may contain metrics with different suffix units, all time suffix units should be normalized to fractional milliseconds.
+
+## Component Metrics Extraction Flow
+
+```mermaid
+graph LR
+    A[FIO Mixed Workload JSON] --> B[Multi-Job Result]
+    B --> C{Job Name Analysis}
+    
+    C -->|contains 'randread'| D[Random Read Component]
+    C -->|contains 'seqread'| E[Sequential Read Component]
+    C -->|contains 'seqwrite'| F[Sequential Write Component]
+    
+    D --> D1[Throughput MB/s]
+    D --> D2[IOPS]
+    D --> D3[Latency Metrics]
+    D3 --> D3a[Mean μs]
+    D3 --> D3b[P50 μs]
+    D3 --> D3c[P95 μs]
+    D3 --> D3d[P99 μs]
+    D3 --> D3e[P99/P50 Ratio]
+    
+    E --> E1[Throughput MB/s]
+    F --> F1[Throughput MB/s]
+    
+    D1 --> G[SystemMetrics JSON]
+    D2 --> G
+    D3a --> G
+    D3b --> G
+    D3c --> G
+    D3d --> G
+    D3e --> G
+    E1 --> G
+    F1 --> G
+    
+    style A fill:#e3f2fd
+    style G fill:#e8f5e8
+    style D fill:#fff3e0
+    style E fill:#f3e5f5
+    style F fill:#fce4ec
+```
+
 ### System Performance Profile
 
-For stage 3 report generation, each system profile will have details summarized taking data from all of the system reports.
+For stage 3 report generation, each system profile will have details summarized taking data from all of the system reports. This means, specifically from the optimal mixed workload findings for each system, and those metrics only.
+
 Like system metrics, the system profile metrics should also be stored in a json file adjacent to the system profile report. These will become available for value function scoring later.
+
+
+### Ranking Function Configuration
+
+The ranking function consists of the product of several weighted components, and provides a scoring where higher values are better.
+
+Each component of the ranking function is based on these facets:
+* a specific metric available from previous stages, as stored in the related json file
+* a mapping function to convert it into "positive inflective" form
+* a scaling function to map the metric into a score
+* optional threshold values.
+* optional "no go" conditions.
+
+These are to support these user-facing options:
+* selecting latency quantiles and thresholds
+* choosing how much throughput, op rate, or latency matters relative to each other
+* Identifying conditions which are "no go" or which, when triggered, cause a massive reduction in value.
+* Choosing roll-off or easing shapes for thresholds or conditions.
+
+The ranking function logic should be implemented in a well-encapsulated way with very thorough unit tests and examples.
+The available ranking functions should be defined in ranking-functions.json, to include:
+* (first) a realtime system function which emphasizes good latency first, then throughput.
+* a throughput-oriented ranking, which emphasizes throughput first, but also considered latency and, to a smaller degree, consistency
+* a balanced ranking which includes throughput and latency and consistency evenly
+* a consistency-oriented ranking which emphasizes the stability of results across systems
+* an example ranking function like 'ranking-function-example' which uses all possible metrics and function options for the purpose of illustration.
+While thresholds and penalty conditions should be available, they shouldn't be applied to any of the ranking functions described here.
+
+Also, the ranking-functions.json should be an embedded resource, and if it doesn't exist also in the local directory before analysis commences, it should be copied out of the class path to the local directory.
+
+For both the system level and the system profile level analysis, by default, all available ranking functions should be used.
+For each ranking function used in any report, it should be contained in a separate sub-section with an appropriate title.
+If the user specifies which ranking functions to use with the --ranking-functions option, then only those ranking functions should be used.
+
 
 ### Cross Profile Comparisons
 
@@ -88,8 +210,10 @@ For stage 4 report generation, each of the system profile summary reports will b
 It should include:
 * key performance indicators for each system profile
 * a ranking of systems according to their results
-
-The ranking should be based on a scoring function. The scoring function used should be clarified and explained in the report.
+* a ranking of system profiles accoring to the system profile averages
+* As with the system level analysis, the system profile analysis should use the same ranking functions and create a similar section in the cross-profile report.
+  * for each of these ranked views, a line explaining the interpretation of the ranking function should be added.
+* When no --ranking-function option is applied, then the report should also include a note telling the user how to select only a specific ranking function.
 
 ### Documentation
 
@@ -98,25 +222,5 @@ A guide for interpreting the results should also be added there.
 A README.md file needs to be created to describe the project, it's key features, and a basic example on how to run it.
 The APLv2 needs to be added to this directory.
 
-## Custom Ranking
 
-The scoring function should be customizable and composable from a command line option.
-The scoring function is a typical `maximal value` function, where higher is better.
-
-### Ranking Function Configuration
-
-The ranking function consists of the product of several components.
-Each component is based on a specific metric available, a mapping function to convert it into "positive inflective" form, a normalizing function to bring metrics into a normalized scale, and possible threshold values.
-Key scenarios to support include:
-* selecting latency quantiles and thresholds
-* choosing how much throughput, op rate, or latency matters relative to each other
-* Identifying conditions which are "no go" or which, when triggered, cause a massive reduction in value.
-* Choosing roll-off or easing shapes for thresholds or conditions.
-
-The ranking function logic should be implemented in a well-encapsulated way with very thorough unit tests and examples.
-
-The default ranking functions should be contained in ranking-functions.json.
-This file should contain multiple ranking functions, not just a flat single ranking function.
-The default ranking function should just be named "default", and be selected by default when the user does not provide another, with the --ranking-function option.
-There should be a comprehensive ranking function in the ranking-functions.json file which uses all possible metrics and function options for the purpose of illustration.
 

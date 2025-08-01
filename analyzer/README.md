@@ -37,8 +37,8 @@ A comprehensive performance analysis tool for comparing results from different r
 # Custom report directory
 ./analyze --report-dir my-performance-analysis
 
-# 🎯 Use custom ranking function
-./analyze --ranking-function throughput-focused
+# 🎯 Use specific ranking functions
+./analyze --ranking-functions realtime,throughput-oriented
 
 # Update existing report  
 ./analyze --report-dir existing-report -U
@@ -118,21 +118,25 @@ report/
 ## Key Performance Insights
 
 ### What the Tool Measures
-- **Optimal Blocksize**: Best random read performance configuration
-- **Knee Points**: Performance thresholds under mixed workloads
-- **Latency Progressions**: How performance degrades with increased load
-- **System Rankings**: Comparative performance across all systems
+- **Optimal Blocksize**: Best random read performance configuration (for matching mixed workloads)
+- **Mixed Workload Components**: Random read, sequential read, and sequential write performance from optimal mixed workloads
+- **Knee Points**: Performance thresholds where latency increases dramatically
+- **Latency Progressions**: How performance degrades with increased streaming load
+- **System Rankings**: Comparative performance using optimal mixed workload metrics
 
-### 🎯 Advanced Scoring System (NEW!)
-- **Multi-Dimensional Rankings**: Balances throughput, latency, and consistency
+### 🎯 Advanced Multi-Ranking System (NEW!)
+- **Multiple Ranking Functions**: Compare systems across different performance priorities simultaneously
+- **Pre-Built Functions**: `realtime`, `throughput-oriented`, `balanced`, `consistency-oriented`
 - **Customizable Weights**: Configure importance of different performance aspects
 - **Threshold Penalties**: Massive score reduction for "no-go" conditions
 - **Value Function Ready**: JSON metrics for automated decision making
 
-### Default Scoring Function
-- **60% Throughput** (logarithmic mapping, higher is better)
-- **30% Latency** (logarithmic mapping, lower is better, penalty for >1ms)  
-- **10% Consistency** (knee-point increase, lower is better, penalty for >50%)
+### Built-in Ranking Functions
+All ranking functions use metrics from optimal mixed workload components:
+- **realtime**: 50% P99 latency, 30% mean latency, 20% throughput (ultra-low latency focus)
+- **throughput-oriented**: 80% throughput, 15% IOPS, 5% latency (high-throughput focus)  
+- **balanced**: 33.3% throughput, 33.3% latency, 33.3% consistency (even performance balance)
+- **consistency-oriented**: 40% consistency, 35% P95 latency, 25% throughput (stable performance focus)
 
 ### Visual Indicators
 - **Unicode Sparklines**: `▁▂▃▄▅▆▇█` show latency progression on logarithmic scale
@@ -144,6 +148,7 @@ report/
 
 - **[User Guide](docs/user-guide.md)**: Complete usage instructions and advanced features
 - **[Interpreting Results](docs/interpreting-results.md)**: How to read and analyze the generated reports
+- **[Ranking Functions Guide](docs/ranking-functions.md)**: 🎯 How to use and create custom ranking functions
 - **[Analysis Method](analysis_method.md)**: Detailed methodology and requirements
 
 ## Command Line Reference
@@ -152,16 +157,18 @@ report/
 Usage: ./analyze [OPTIONS]
 
 Options:
-  --report-dir DIR     Specify report directory name (default: "report")
-  --ranking-function NAME 🎯 Name of ranking function from ranking-functions.json
-  -U                   Update mode - allow overwriting existing report  
-  -h, --help           Show help message
+  --report-dir DIR        Specify report directory name (default: "report")
+  --ranking-functions NAME 🎯 Name(s) of ranking function(s) from ranking-functions.json
+                          Supports comma-separated values and multiple occurrences
+  -U                      Update mode - allow overwriting existing report  
+  -h, --help              Show help message
 
 Examples:
-  ./analyze                              # Basic analysis with default scoring
-  ./analyze --report-dir perf-2024-01    # Custom directory
-  ./analyze --ranking-function latency-focused   # 🎯 Custom ranking function
-  ./analyze --report-dir existing -U     # Update existing
+  ./analyze                                    # All ranking functions (realtime, throughput-oriented, balanced, consistency-oriented)
+  ./analyze --report-dir perf-2024-01          # Custom directory with all rankings
+  ./analyze --ranking-functions realtime       # 🎯 Only real-time optimized ranking
+  ./analyze --ranking-functions realtime,balanced  # 🎯 Multiple specific rankings
+  ./analyze --report-dir existing -U           # Update existing
 ```
 
 ## System Requirements
@@ -173,6 +180,57 @@ Examples:
 
 ## Architecture
 
+```mermaid
+graph TB
+    subgraph "Input Layer"
+        A[FIO JSON Files]
+        B[.noscan Exclusions]
+        C[ranking-functions.json]
+    end
+    
+    subgraph "Analysis Engine"
+        D[ReportAnalyzer]
+        E[WorkloadAnalyzer]
+        F[ScoringFunction]
+        G[SparklineGenerator]
+    end
+    
+    subgraph "Data Models"
+        H[SystemMetrics]
+        I[FioResult]
+        J[SystemPerformanceData]
+    end
+    
+    subgraph "Output Layer"
+        K[📄 Markdown Reports]
+        L[📊 JSON Metrics]
+        M[🎯 Multi-Dimensional Rankings]
+        N[📈 Unicode Sparklines]
+    end
+    
+    A --> D
+    B --> D
+    C --> F
+    D --> E
+    D --> F
+    D --> G
+    
+    E --> H
+    E --> I
+    F --> J
+    
+    H --> K
+    H --> L
+    F --> M
+    G --> N
+    
+    style D fill:#e3f2fd
+    style F fill:#fff3e0
+    style H fill:#e8f5e8
+    style M fill:#fce4ec
+```
+
+**Technical Details:**
 - **Language**: Java 17 compatible
 - **Build System**: Maven
 - **Dependencies**: Jackson (JSON processing), JUnit 5 (testing), minimal external dependencies
